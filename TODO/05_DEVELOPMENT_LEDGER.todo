@@ -1,0 +1,74 @@
+WindowPane development ledger
+
+Status: DONE
+Milestone: Traceable first-preview and visual-guide development
+Dependencies: None
+Purpose: Explain actions, effects, reasons, mechanisms and evidence.
+
+Tasks:
+- [x] Preserve the rationale for moving from a portal widget to a visual mirror.
+- [x] Append implementation and qualification outcomes as they actually occur.
+
+Acceptance criteria:
+- Public history contains no credentials, private portal data, or raw conversation.
+- Design, implementation, technical verification and human acceptance are distinct.
+
+Completion evidence:
+- Native source, build commands, focused tests and actual synthetic UI/pixel
+  artifacts exist. See 04_QUALIFICATION.todo for exact observations and limits.
+
+Completion log:
+- 2026-11-06: Chose a generic local visual mirror instead of a site client.
+  Effect: authentication stays entirely with the source application.
+  Reason: the desired utility must not require enterprise sign-in or cookies.
+  Mechanism: user-selected Windows capture plus native per-pixel composition.
+  Trade-off: the source remains open and responsible for refreshing its data.
+- 2026-11-06: Chose explicit pixel composition rather than basic DWM thumbnails.
+  Reason: color-keying needs per-pixel alpha, not just a cropped live thumbnail.
+  Native capture and CPU readback costs require actual measurements; no promise
+  of zero overhead or full application compatibility has been made.
+- 2026-11-06: First compilation exposed SDK namespace/header issues and a
+  PowerShell argument-parsing issue in the SDK version switch. Qualified the
+  C++/WinRT and ABI namespaces, included DWM interop, and quoted the CMake flag.
+  The /W4 /WX gate also caught a lossy diagnostic string conversion; UTF-8
+  conversion now uses winrt::to_string instead of narrowing wchar_t characters.
+- 2026-11-06: First native capture/UI run passed real color-keying and desktop
+  blending but timed out after restoring a minimized fixture. Windows had
+  queued a differently sized animation frame. A frame's size is not sufficient
+  evidence of a true source resize: current normal-window geometry now decides
+  invalidation, and transient mismatched frames are discarded.
+- 2026-11-06: Actual controls-image inspection found dark checkbox text and an
+  incompletely repainted lower section. Native checkbox theming now follows
+  the app's explicit colors; the owned-window capture waits for and repaints
+  child controls. The new image visibly includes recovery buttons and shortcuts.
+- 2026-11-06: Added guarded synthetic integration coverage across snipping,
+  color picking, resizing/snap targets, source lifecycle and recovery. The
+  harness refuses any non-fixture source HWND before capture and refuses screen
+  sample points obscured by unrelated windows.
+- 2026-11-06: First preview qualified locally with 18 algorithm cases, 26 native
+  integration checks, native startup/tray recovery, formatting and whitespace
+  checks. The executable is about 0.4MB, not an installer. A five-second
+  180x110 fixture observed about 46MB working set and 0.62% of one logical core;
+  these are bounded observations, not promises for every source or GPU.
+- 2026-11-06: Added focused chaptered guides, algorithm/design explanations and
+  original synthetic figures. No huge book/PDF/atlas, installer, account
+  integration, commit, push or release was implied by following the manual.
+- 2026-11-06: User requested a detailed README with many GIFs/screenshots. Added
+  an explicitly invoked --demo-assets harness that uses only its owned fixture
+  and controls, plus a Python/Pillow documentation-only encoder. Four GIFs show
+  captured source repaint, opacity events, sampled color removal and aspect fit.
+  Nine PNGs show real controls states and annotated native-output references.
+  Reading cards/checkerboards are not application chrome; paced animations are
+  not mouse recordings or frame-rate/latency measurements.
+- 2026-11-06: Normal preview was already running, causing linker LNK1104. Used
+  isolated build\media rather than stop the user's app. Extended demo teardown
+  initially stalled with active capture; explicitly releasing capture before
+  destroying its owned source fixed it. Standard native tests still cover source
+  closure separately. Demo export passed 27 checks; both standard CTest targets
+  passed. Decoded animation frames change as expected; controls/montage/native
+  states and encoded samples visually reviewed. No release or publication.
+- 2026-11-06: Encoded-GIF review caught incorrect dark foreground hues because
+  the initial shared palette only sampled each sequence's first state. Built
+  the palette from all states, re-encoded and reinspected. Every decoded frame's
+  native-output area now stays within 12/255 per-channel error of its full-color
+  reference; a changing-frame check alone would not have caught the color issue.

@@ -1,0 +1,35 @@
+Desktop selection and pane controls
+
+Status: DONE
+Milestone: Usable titlebar-free floating mirror
+Dependencies: 02_NATIVE_CAPTURE
+Purpose: Expose the live view without taking unnecessary screen space.
+
+Tasks:
+- [x] Add snipping selection with Escape cancellation.
+- [x] Add borderless always-on-top pane with drag, resizing and context controls.
+- [x] Add opacity and color-key picker/tolerance/softness controls.
+- [x] Add hide/show recovery, tray menu and registered keyboard shortcuts.
+- [x] Make errors visible and fully transparent/click-through panes recoverable.
+
+Acceptance criteria:
+- Normal view has no title bar and no permanent toolbar.
+- User can reposition and recover a hidden or transparent pane.
+- Picker samples captured source pixels, not an unrelated desktop screenshot.
+- No click forwarding or interaction with source application.
+- Selection and settings cancel safely without leaving an unclosable overlay.
+
+Completion evidence:
+- Native tests exercise selection mouse messages, actual slider/key-picker
+  handlers, resized picker mapping, native drag/resize hit tests, edge snapping,
+  click-through style, reset, hiding and cancellation.
+- scripts\smoke-launch.ps1 passed normal startup, close-to-tray, controls recovery
+  and clean exit. This is separate from the test mode that omits global hotkeys.
+- Actual owned controls image docs\assets\controls.png inspected after fixing
+  native checkbox text contrast and ensuring all child controls were repainted.
+- Human physical interaction review and mixed-DPI/multi-monitor qualification
+  remain pending. A normal pane has no caption/permanent toolbar.
+
+Completion log:
+- 2026-11-06: Recorded requested interaction scope.
+- 2026-11-06: Completed the first one-pane desktop workflow and recovery surfaces.

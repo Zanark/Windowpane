@@ -1,0 +1,26 @@
+WindowPane foundation
+
+Status: DONE
+Milestone: Explicit first-preview contract
+Dependencies: None
+Purpose: Make a generic local mirror, not a credential-bearing portal client.
+
+Tasks:
+- [x] Read development manual and inspect repository and toolchain.
+- [x] Register this user-designated base and capture previous product decisions.
+- [x] Select native Win32/C++ and Windows Graphics Capture; no bundled browser.
+- [x] Define source-availability, privacy and approval boundaries.
+
+Acceptance criteria:
+- No application login, cookie access, network client, telemetry or disk recording.
+- Document that mirroring does not refresh the original app's underlying data.
+- Existing user work is preserved. No automatic commit, install or publication.
+
+Completion evidence:
+- Only README.md existed in the clean initial Git worktree.
+- Visual Studio 2022 Enterprise and Windows SDK 10.0.26100.0 are installed.
+- Owned .agent-context created; root added to Context Mesh discovery configuration.
+- Context Mesh publication is recorded in the private handoff after its actual run.
+
+Completion log:
+- 2026-11-06: Initial design boundaries established from the user's conversation.

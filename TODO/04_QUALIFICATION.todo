@@ -1,0 +1,45 @@
+First-preview qualification and delivery
+
+Status: DONE
+Milestone: Runnable native preview with honest limits
+Dependencies: 02_NATIVE_CAPTURE, 03_DESKTOP_CONTROLS
+Purpose: Verify the actual capture path and document how to use and develop it.
+
+Tasks:
+- [x] Build and run focused crop/color-mask tests.
+- [x] Exercise native capture and UI paths against original synthetic fixtures.
+- [x] Check cancellation, source closure, opacity/keying and recovery.
+- [x] Produce a local executable and document build/run commands.
+- [x] Update user guide, architecture/algorithms, ledger and owned context.
+- [x] Record environmental and human-acceptance limits separately.
+
+Acceptance criteria:
+- Actual native executable launches and its synthetic capture receives live frames.
+- No private browser/desktop capture is needed for evidence.
+- Resource observations identify fixture and time window; no universal budget claim.
+- No commit, push, installer activation or release without explicit authorization.
+
+Completion evidence:
+- scripts\build.ps1 -Test: native Release build and both CTest targets pass;
+  18 pure crop/pixel cases and 26 native integration checks.
+- scripts\smoke-launch.ps1: normal startup, close-to-tray, controls recovery and
+  exit pass. Its process was stopped normally; no helper remains running.
+- clang-format --dry-run --Werror and git diff --check pass.
+- Executable: build\Release\WindowPane.exe, unsigned local x64 preview.
+  The 2026-11-06 01:44 run produced 391168 bytes; SHA256
+  522BF173E1D9D45BA9711DBB50D040AC261BABF31F0356E3053F6D16C56FB893.
+- Environment: Windows version 10.0.26200.0, Windows SDK 10.0.26100.0,
+  MSVC 19.44.35229.0. No clean-machine, other-GPU, HDR, protected-app or
+  all-source-application compatibility claim.
+- Controlled original fixture observation: 180x110 crop, selected rate 5 fps,
+  5016ms sample, 22 received frames, process CPU 0.623006% of one logical core,
+  working set 48328704 bytes, private bytes 30261248. Not a general budget;
+  external DWM/GPU work is not included in process CPU time.
+- Actual synthetic input/output and owned controls images were inspected.
+  Native source and pixel guards forbid private desktop capture during tests.
+- Human acceptance remains pending. No commit, install, startup task or
+  publication was performed.
+
+Completion log:
+- 2026-11-06: Initial bounded qualification plan.
+- 2026-11-06: Delivered a locally qualified first preview and updated its guides.

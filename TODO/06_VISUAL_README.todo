@@ -1,0 +1,38 @@
+WindowPane visual README
+
+Status: DONE
+Milestone: Screenshot-rich product guide with actual native demo GIFs
+Dependencies: 04_QUALIFICATION.todo
+Purpose: Explain the preview visually without exposing private application data.
+
+Tasks:
+- [x] Export native live, opacity, keyed and aspect-fit sequences from the fixture.
+- [x] Create and inspect compact GIFs and screenshots with explicit provenance.
+- [x] Expand README setup, walkthrough, controls, recovery and preview limits.
+- [x] Reconcile media reproduction notes, index, ledger and owned context.
+
+Acceptance criteria:
+- All images use the owned fixture or WindowPane controls; no private capture.
+- GIFs show actual exported states, not fabricated UI interaction or timing.
+- Media is linked locally, captioned and reproducible with documented tools.
+- App behavior, fixture automation, human acceptance and publication stay distinct.
+
+Completion evidence:
+- Actual native --demo-assets export passed 27 checks. Standard CTest retained
+  18 pure cases and 26 native checks. Both CTest targets pass in build\media.
+- Four GIFs decode with 8/17/3/13 frames, expected timing and non-static output.
+- Nine new PNG assets include three actual controls states, five pane cards
+  and a four-state montage. Native surfaces and annotated derivatives are labeled.
+- README includes 13 local images: four animations and nine PNGs.
+- Full controls, representative native states, montage and encoded GIF samples
+  visually reviewed; image decoding, local links and whitespace checked.
+- No private screen capture, user-process termination, commit or publication.
+
+Completion log:
+- 2026-11-06: User requested proper README details and many GIFs/screenshots.
+- 2026-11-06: Existing running preview locked its executable; built the harness
+  in build\media instead of interrupting it. Initial extended teardown stalled;
+  release capture before destroying the owned fixture fixed the export.
+- 2026-11-06: Added reproducible native demo export and Pillow encoder. README
+  now teaches setup, selection, live updates, opacity/keying, sizing, recovery,
+  source lifecycle, privacy and limitations with public-safe visual references.

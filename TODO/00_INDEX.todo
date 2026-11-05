@@ -1,0 +1,34 @@
+WindowPane workstream index
+
+Status: DONE
+Milestone: First native preview and visual product guide
+Dependencies: None
+Purpose: Keep implementation, evidence, and acceptance distinct.
+
+Tasks:
+- 01_FOUNDATION.todo - DONE: product boundaries, context and native build choice.
+- 02_NATIVE_CAPTURE.todo - DONE: cropped live capture and pixel processing.
+- 03_DESKTOP_CONTROLS.todo - DONE: selection, borderless pane and recovery.
+- 04_QUALIFICATION.todo - DONE: local synthetic qualification and runnable handoff.
+- 05_DEVELOPMENT_LEDGER.todo - DONE: first-preview causal development history.
+- 06_VISUAL_README.todo - DONE: detailed README, four GIFs and nine screenshots/cards.
+
+Acceptance criteria:
+- Each workstream has explicit prerequisites and observed completion evidence.
+- DONE is not a claim of user approval, publication, or universal compatibility.
+
+Completion evidence:
+- Initial empty-source repository inspected; development manual entry reads complete.
+- Native Release build, 18 pixel/crop cases, 26 native integration checks and
+  ordinary startup/tray/exit smoke passed on the development machine.
+- Guides, source-safe images, build commands and local executable are present.
+- Visual README includes 13 locally linked media assets and reproducible export
+  notes. Native media mode passed 27 checks; standard CTest remained green.
+- Human acceptance and broad application/mixed-DPI/HDR qualification are pending.
+
+Completion log:
+- 2026-11-06: Created bounded first-preview workstreams. No publication requested.
+- 2026-11-06: First local preview completed. One session-only pane; future
+  persistence, multi-pane UX, packaging and wider qualification are separate work.
+- 2026-11-06: Expanded visual guide with actual native demo sequences, screenshots,
+  asset provenance, recovery/troubleshooting and explicit preview boundaries.

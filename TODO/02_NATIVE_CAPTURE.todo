@@ -1,0 +1,34 @@
+Native cropped capture and transparency
+
+Status: DONE
+Milestone: Live source-region pixels without browser integration
+Dependencies: 01_FOUNDATION
+Purpose: Mirror a chosen window through the operating system with bounded work.
+
+Tasks:
+- [x] Create native CMake build with application and focused test targets.
+- [x] Capture only an explicitly selected source window with Windows Graphics Capture.
+- [x] Read back only the selected rectangle at a bounded cadence.
+- [x] Implement opacity, sampled color key, tolerance and soft alpha edges.
+- [x] Release capture resources on stop and report failure/source unavailability.
+
+Acceptance criteria:
+- Matching key colors are transparent; other colors retain correct premultiplied alpha.
+- Crop validation handles reversed selections, bounds and invalid geometry.
+- No fallback to whole-desktop capture, authentication, persistence or network.
+- Synthetic original window produces fresh, correctly cropped frames.
+
+Completion evidence:
+- scripts\build.ps1 -Test passed: Release /W4 /WX build, 18 crop/pixel checks
+  and 26 native integration checks. Exact native output is build\native-test.txt.
+- Actual WGC fixture pixels, source repaint, selected-color alpha and real
+  layered-window desktop blending were observed, not just model calculations.
+- Initial minimize/restore check failed: queued old-sized animation frames
+  incorrectly invalidated the crop. Poll now compares real window geometry and
+  drops transient frame-size mismatches; restore and real-resize cases pass.
+- OS source-window GPU surface is retained in memory; CPU readback is crop-only.
+  No shader pipeline or negligible-GPU-cost claim is made.
+
+Completion log:
+- 2026-11-06: Started native first slice.
+- 2026-11-06: Completed and locally qualified the native crop/composition pipeline.
