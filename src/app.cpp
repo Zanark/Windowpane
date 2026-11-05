@@ -9,6 +9,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <cmath>
 #include <cstring>
 #include <filesystem>
 #include <fstream>
@@ -25,7 +26,9 @@ namespace
 {
 constexpr wchar_t ManagerClass[] = L"WindowPane.Controls";
 constexpr wchar_t PaneClass[] = L"WindowPane.LivePane";
+constexpr wchar_t GripClass[] = L"WindowPane.CornerGrip";
 constexpr wchar_t SnipClass[] = L"WindowPane.Selection";
+constexpr int IconResource = 101;
 constexpr UINT TrayMessage = WM_APP + 1;
 constexpr UINT ShowControlsMessage = WM_APP + 2;
 constexpr int NewPane = 100;
@@ -233,6 +236,10 @@ class App
         {
             DestroyWindow(snipper_);
         }
+        if (IsWindow(grip_))
+        {
+            DestroyWindow(grip_);
+        }
         if (pane_)
         {
             DestroyWindow(pane_);
@@ -258,7 +265,13 @@ class App
         WNDCLASSEXW type{sizeof(type)};
         type.hInstance = instance_;
         type.hCursor = LoadCursorW(nullptr, IDC_ARROW);
-        type.hIcon = LoadIconW(nullptr, IDI_APPLICATION);
+        type.hIcon = LoadIconW(instance_, MAKEINTRESOURCEW(IconResource));
+        CheckWin32(type.hIcon != nullptr, "Cannot load the WindowPane icon");
+        smallIcon_ = static_cast<HICON>(LoadImageW(instance_, MAKEINTRESOURCEW(IconResource), IMAGE_ICON,
+                                                   GetSystemMetrics(SM_CXSMICON),
+                                                   GetSystemMetrics(SM_CYSMICON), LR_SHARED));
+        CheckWin32(smallIcon_ != nullptr, "Cannot load the small WindowPane icon");
+        type.hIconSm = smallIcon_;
         type.hbrBackground = brush_;
         type.lpszClassName = ManagerClass;
         type.lpfnWndProc = ManagerProc;
@@ -267,6 +280,10 @@ class App
         type.lpszClassName = PaneClass;
         type.lpfnWndProc = PaneProc;
         CheckWin32(RegisterClassExW(&type), "Cannot register pane window");
+        type.lpszClassName = GripClass;
+        type.lpfnWndProc = GripProc;
+        type.hCursor = LoadCursorW(nullptr, IDC_SIZEALL);
+        CheckWin32(RegisterClassExW(&type), "Cannot register corner grip");
         type.hbrBackground = static_cast<HBRUSH>(GetStockObject(BLACK_BRUSH));
         type.hCursor = LoadCursorW(nullptr, IDC_CROSS);
         type.lpszClassName = SnipClass;
@@ -281,6 +298,10 @@ class App
                                 L"WindowPane live view", WS_POPUP | WS_THICKFRAME, 100, 100, 320, 140,
                                 nullptr, nullptr, instance_, this);
         CheckWin32(pane_ != nullptr, "Cannot create live pane");
+        grip_ = CreateWindowExW(WS_EX_LAYERED | WS_EX_TOPMOST | WS_EX_TOOLWINDOW, GripClass,
+                                L"WindowPane grip - drag to move; right-click for options", WS_POPUP, 100,
+                                100, 28, 28, pane_, nullptr, instance_, this);
+        CheckWin32(grip_ != nullptr, "Cannot create corner grip");
         CheckWin32(SetTimer(manager_, 1, static_cast<UINT>(1000 / rate_), nullptr) != 0,
                    "Cannot start update timer");
         if (!testMode)
@@ -375,6 +396,15 @@ class App
         }
         return Dispatch(self, [&] { return self->OnSnip(hwnd, message, wparam, lparam); });
     }
+    static LRESULT CALLBACK GripProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
+    {
+        App* self = Bind(hwnd, message, lparam);
+        if (!self)
+        {
+            return DefWindowProcW(hwnd, message, wparam, lparam);
+        }
+        return Dispatch(self, [&] { return self->OnGrip(hwnd, message, wparam, lparam); });
+    }
 
     int Dip(int value) const
     {
@@ -434,11 +464,18 @@ class App
         Control(L"STATIC", L"Update rate", 0, 207, 22, 526, 128, 24);
         HWND rate =
             Control(L"COMBOBOX", L"Update rate", WS_TABSTOP | CBS_DROPDOWNLIST, Rate, 230, 520, 168, 120);
-        for (const wchar_t* label : {L"1 fps  /  quiet", L"5 fps  /  balanced", L"10 fps  /  smooth"})
+        for (int framesPerSecond : CaptureRates)
         {
-            SendMessageW(rate, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(label));
+            const std::wstring label = std::to_wstring(framesPerSecond) + L" fps" +
+                                       (framesPerSecond == CaptureRates.back() ? L"  /  maximum" : L"");
+            const LRESULT index =
+                SendMessageW(rate, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(label.c_str()));
+            CheckWin32(index >= 0, "Cannot add update rate");
+            if (framesPerSecond == rate_)
+            {
+                SendMessageW(rate, CB_SETCURSEL, static_cast<WPARAM>(index), 0);
+            }
         }
-        SendMessageW(rate, CB_SETCURSEL, rate_ == 1 ? 0 : rate_ == 5 ? 1 : 2, 0);
         Control(L"BUTTON", L"Pass mouse clicks through the pane", WS_TABSTOP | BS_AUTOCHECKBOX, ClickThrough,
                 22, 566, 376, 26);
         Control(L"BUTTON", L"Hide / show", WS_TABSTOP | BS_OWNERDRAW, HidePane, 22, 610, 176, 36);
@@ -463,7 +500,7 @@ class App
         tray_.uID = 1;
         tray_.uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP;
         tray_.uCallbackMessage = TrayMessage;
-        tray_.hIcon = LoadIconW(nullptr, IDI_APPLICATION);
+        tray_.hIcon = smallIcon_;
         wcscpy_s(tray_.szTip, L"WindowPane - double-click for controls");
         trayReady_ = Shell_NotifyIconW(NIM_ADD, &tray_) != FALSE;
         if (!trayReady_)
@@ -529,6 +566,122 @@ class App
         SetWindowTextW(keyLabel_, hasKeyColor_ ? color.str().c_str() : L"No color selected");
     }
 
+    bool NeedsResnip() const
+    {
+        return lastFrame_.empty() &&
+               (sourcePhase_ == CaptureState::Resized || sourcePhase_ == CaptureState::Closed);
+    }
+
+    void SyncGrip()
+    {
+        if (!IsWindow(grip_))
+        {
+            return;
+        }
+        if (!IsWindowVisible(pane_) || snipper_ || picking_)
+        {
+            ShowWindow(grip_, SW_HIDE);
+            return;
+        }
+        RECT pane{};
+        CheckWin32(GetWindowRect(pane_, &pane), "Cannot locate the pane for its grip");
+        const int dpi = static_cast<int>(GetDpiForWindow(pane_));
+        const int inset = MulDiv(6, dpi, 96);
+        const int side = std::max(1, std::min({MulDiv(28, dpi, 96), static_cast<int>(pane.right - pane.left),
+                                               static_cast<int>(pane.bottom - pane.top)}));
+        const int x = std::max(static_cast<int>(pane.left), static_cast<int>(pane.right) - inset - side);
+        const int y = std::min(static_cast<int>(pane.bottom) - side, static_cast<int>(pane.top) + inset);
+        const RECT button = ResnipButton();
+        const RECT localGrip{x - pane.left, y - pane.top, x - pane.left + side, y - pane.top + side};
+        RECT overlap{};
+        if (IntersectRect(&overlap, &button, &localGrip))
+        {
+            ShowWindow(grip_, SW_HIDE);
+            return;
+        }
+        const bool redraw = gripSurface_.Width() != side;
+        if (redraw)
+        {
+            gripSurface_.Resize(side, side);
+            const double scale = side / 28.0;
+            const double radius = 7 * scale;
+            for (int row = 0; row < side; ++row)
+            {
+                for (int column = 0; column < side; ++column)
+                {
+                    const double qx = std::abs(column + 0.5 - side / 2.0) - (side / 2.0 - radius);
+                    const double qy = std::abs(row + 0.5 - side / 2.0) - (side / 2.0 - radius);
+                    const double distance = std::hypot(std::max(qx, 0.0), std::max(qy, 0.0)) +
+                                            std::min(std::max(qx, qy), 0.0) - radius;
+                    const double coverage = std::clamp(0.5 - distance, 0.0, 1.0);
+                    const bool border = distance > -1.2 * scale;
+                    const double gradient = static_cast<double>(row) / std::max(1, side - 1);
+                    double red = border ? 184 : 63 - 25 * gradient;
+                    double green = border ? 211 : 83 - 29 * gradient;
+                    double blue = border ? 224 : 103 - 32 * gradient;
+                    double alpha = border ? 175 : 218;
+                    double dot{};
+                    for (int dotY : {8, 14, 20})
+                    {
+                        for (int dotX : {10, 18})
+                        {
+                            dot = std::max(dot, std::clamp(1.3 * scale + 0.5 -
+                                                               std::hypot(column + 0.5 - dotX * scale,
+                                                                          row + 0.5 - dotY * scale),
+                                                           0.0, 1.0));
+                        }
+                    }
+                    red += (222 - red) * dot;
+                    green += (251 - green) * dot;
+                    blue += (245 - blue) * dot;
+                    alpha = (alpha + (245 - alpha) * dot) * coverage;
+                    gripSurface_.Pixels()[row * side + column] = {
+                        static_cast<std::uint8_t>(std::lround(blue * alpha / 255)),
+                        static_cast<std::uint8_t>(std::lround(green * alpha / 255)),
+                        static_cast<std::uint8_t>(std::lround(red * alpha / 255)),
+                        static_cast<std::uint8_t>(std::lround(alpha))};
+                }
+            }
+        }
+        RECT previous{};
+        CheckWin32(GetWindowRect(grip_, &previous), "Cannot read corner-grip bounds");
+        const bool moved = previous.left != x || previous.top != y ||
+                           previous.right - previous.left != side || previous.bottom - previous.top != side;
+        if (moved)
+        {
+            CheckWin32(
+                SetWindowPos(grip_, HWND_TOPMOST, x, y, side, side, SWP_NOACTIVATE | SWP_NOOWNERZORDER),
+                "Cannot align corner grip");
+        }
+        if (redraw || moved || !IsWindowVisible(grip_))
+        {
+            gripSurface_.Present(grip_);
+            ShowWindow(grip_, SW_SHOWNOACTIVATE);
+        }
+    }
+
+    RECT ResnipButton() const
+    {
+        if (!pane_ || !NeedsResnip())
+        {
+            return {};
+        }
+        RECT client{};
+        GetClientRect(pane_, &client);
+        const int dpi = static_cast<int>(GetDpiForWindow(pane_));
+        const int padding =
+            std::min(MulDiv(12, dpi, 96), static_cast<int>(std::min(client.right, client.bottom)) / 8);
+        const int width = std::min(MulDiv(132, dpi, 96), static_cast<int>(client.right) - 2 * padding);
+        const int height = std::min(MulDiv(34, dpi, 96), static_cast<int>(client.bottom) - 2 * padding);
+        return {padding, client.bottom - padding - height, padding + width, client.bottom - padding};
+    }
+
+    bool OnResnipButton(POINT point) const
+    {
+        const RECT button = ResnipButton();
+        return PtInRect(&button, point) != FALSE;
+    }
+
     void Render()
     {
         if (!pane_ || !IsWindowVisible(pane_))
@@ -543,6 +696,7 @@ class App
         {
             return;
         }
+        ApplyClickThrough();
         surface_.Resize(width, height);
         if (!lastFrame_.empty())
         {
@@ -562,8 +716,33 @@ class App
             SetTextColor(surface_.Dc(), Foreground);
             HGDIOBJ oldFont = SelectObject(surface_.Dc(), font_);
             RECT text{12, 8, width - 12, height - 8};
+            const RECT button = ResnipButton();
+            if (button.right > button.left)
+            {
+                text.bottom = button.top - 8;
+            }
             const std::wstring message = sourceState_.empty() ? L"Waiting for source..." : sourceState_;
             DrawTextW(surface_.Dc(), message.c_str(), -1, &text, DT_WORDBREAK | DT_NOPREFIX);
+            if (button.right > button.left)
+            {
+                HBRUSH fill = CreateSolidBrush(resnipPressed_ ? RGB(55, 185, 158) : Accent);
+                CheckWin32(fill != nullptr, "Cannot draw the snip-again button");
+                FillRect(surface_.Dc(), &button, fill);
+                DeleteObject(fill);
+                SetTextColor(surface_.Dc(), Background);
+                RECT label = button;
+                const wchar_t* caption =
+                    button.right - button.left >= MulDiv(100, static_cast<int>(GetDpiForWindow(pane_)), 96)
+                        ? L"Snip again"
+                        : L"Snip";
+                DrawTextW(surface_.Dc(), caption, -1, &label,
+                          DT_CENTER | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX);
+                if (GetFocus() == pane_)
+                {
+                    InflateRect(&label, -3, -3);
+                    DrawFocusRect(surface_.Dc(), &label);
+                }
+            }
             SelectObject(surface_.Dc(), oldFont);
             for (int i = 0; i < width * height; ++i)
             {
@@ -571,6 +750,7 @@ class App
             }
         }
         surface_.Present(pane_);
+        SyncGrip();
     }
 
     void StartCurrent()
@@ -583,6 +763,7 @@ class App
         replacement->Start(source_, crop_, rate_);
         capture_ = std::move(replacement);
         lastFrame_.clear();
+        sourcePhase_ = CaptureState::Waiting;
         sourceState_ = L"Waiting for source...";
         started_ = GetTickCount64();
         error_.clear();
@@ -601,6 +782,7 @@ class App
         if (frame.state == CaptureState::Frame)
         {
             lastFrame_ = std::move(frame.pixels);
+            sourcePhase_ = CaptureState::Frame;
             sourceState_.clear();
             ++frames_;
             SetStatus(picking_ ? L"Click a background color inside the live pane. Esc cancels."
@@ -610,6 +792,7 @@ class App
         else if (frame.state != CaptureState::Waiting)
         {
             lastFrame_.clear();
+            sourcePhase_ = frame.state;
             if (frame.state == CaptureState::Minimized)
             {
                 sourceState_ = L"Source minimized\nRestore it to resume.";
@@ -705,10 +888,14 @@ class App
     void ApplyClickThrough()
     {
         const LONG_PTR style = GetWindowLongPtrW(pane_, GWL_EXSTYLE);
+        const LONG_PTR desired = clickThrough_ && !picking_ && !NeedsResnip() ? style | WS_EX_TRANSPARENT
+                                                                              : style & ~WS_EX_TRANSPARENT;
+        if (style == desired)
+        {
+            return;
+        }
         SetLastError(0);
-        const LONG_PTR result = SetWindowLongPtrW(pane_, GWL_EXSTYLE,
-                                                  clickThrough_ && !picking_ ? style | WS_EX_TRANSPARENT
-                                                                             : style & ~WS_EX_TRANSPARENT);
+        const LONG_PTR result = SetWindowLongPtrW(pane_, GWL_EXSTYLE, desired);
         CheckWin32(result != 0 || GetLastError() == 0, "Cannot change pane input mode");
     }
 
@@ -775,14 +962,27 @@ class App
     void CancelSnip()
     {
         CloseSnip();
-        if (hadVisiblePane_)
-        {
-            StartCurrent();
-        }
+        RestorePreviousPane();
         SetStatus(L"Selection cancelled. Previous pane preserved.");
         if (!testMode_)
         {
             ShowControls();
+        }
+    }
+
+    void RestorePreviousPane()
+    {
+        if (hadVisiblePane_)
+        {
+            if (NeedsResnip())
+            {
+                ShowWindow(pane_, SW_SHOWNOACTIVATE);
+                Render();
+            }
+            else
+            {
+                StartCurrent();
+            }
         }
     }
 
@@ -807,10 +1007,7 @@ class App
                        {bounds.left, bounds.top, bounds.right - bounds.left, bounds.bottom - bounds.top});
         if (region.width < 8 || region.height < 8 || region.width > 4096 || region.height > 4096)
         {
-            if (hadVisiblePane_)
-            {
-                StartCurrent();
-            }
+            RestorePreviousPane();
             SetStatus(L"Select a region between 8 and 4096 pixels per side. Previous pane preserved.");
             if (!testMode_)
             {
@@ -825,6 +1022,7 @@ class App
         crop_ = crop;
         capture_ = std::move(replacement);
         lastFrame_.clear();
+        sourcePhase_ = CaptureState::Waiting;
         userHidden_ = false;
         sourceState_ = L"Waiting for source...";
         started_ = GetTickCount64();
@@ -908,7 +1106,9 @@ class App
             if (notification == CBN_SELCHANGE)
             {
                 const LRESULT index = SendDlgItemMessageW(manager_, Rate, CB_GETCURSEL, 0, 0);
-                rate_ = index == 0 ? 1 : index == 1 ? 5 : 10;
+                CheckWin32(index >= 0 && index < static_cast<LRESULT>(CaptureRates.size()),
+                           "Cannot read selected update rate");
+                rate_ = CaptureRates[static_cast<std::size_t>(index)];
                 if (capture_)
                 {
                     capture_->SetRate(rate_);
@@ -1059,6 +1259,12 @@ class App
 
     LRESULT OnPane(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
     {
+        if (message == WM_WINDOWPOSCHANGED)
+        {
+            const LRESULT result = DefWindowProcW(hwnd, message, wparam, lparam);
+            SyncGrip();
+            return result;
+        }
         if (message == WM_NCCALCSIZE)
         {
             return 0;
@@ -1073,6 +1279,12 @@ class App
             GetWindowRect(hwnd, &bounds);
             const int x = GET_X_LPARAM(lparam);
             const int y = GET_Y_LPARAM(lparam);
+            POINT client{x, y};
+            ScreenToClient(hwnd, &client);
+            if (OnResnipButton(client))
+            {
+                return HTCLIENT;
+            }
             const int edge = MulDiv(8, static_cast<int>(GetDpiForWindow(hwnd)), 96);
             const bool left = x < bounds.left + edge;
             const bool right = x >= bounds.right - edge;
@@ -1158,6 +1370,51 @@ class App
             Menu(hwnd, false);
             return 0;
         }
+        if (message == WM_LBUTTONDOWN && OnResnipButton({GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam)}))
+        {
+            resnipPressed_ = true;
+            SetCapture(hwnd);
+            SetFocus(hwnd);
+            Render();
+            return 0;
+        }
+        if (message == WM_LBUTTONUP && resnipPressed_)
+        {
+            resnipPressed_ = false;
+            const bool activate = OnResnipButton({GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam)});
+            if (GetCapture() == hwnd)
+            {
+                ReleaseCapture();
+            }
+            if (activate)
+            {
+                BeginSnip();
+            }
+            else
+            {
+                Render();
+            }
+            return 0;
+        }
+        if ((message == WM_CAPTURECHANGED || message == WM_CANCELMODE) && resnipPressed_)
+        {
+            resnipPressed_ = false;
+            if (GetCapture() == hwnd)
+            {
+                ReleaseCapture();
+            }
+            Render();
+            return 0;
+        }
+        if (message == WM_KEYDOWN && (wparam == VK_RETURN || wparam == VK_SPACE) && NeedsResnip())
+        {
+            BeginSnip();
+            return 0;
+        }
+        if (message == WM_SETFOCUS || message == WM_KILLFOCUS)
+        {
+            Render();
+        }
         if (message == WM_LBUTTONUP && picking_)
         {
             EndPick(GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam));
@@ -1167,6 +1424,15 @@ class App
         {
             SetCursor(LoadCursorW(nullptr, IDC_CROSS));
             return TRUE;
+        }
+        if (message == WM_SETCURSOR && LOWORD(lparam) == HTCLIENT)
+        {
+            POINT cursor{};
+            if (GetCursorPos(&cursor) && ScreenToClient(hwnd, &cursor) && OnResnipButton(cursor))
+            {
+                SetCursor(LoadCursorW(nullptr, IDC_HAND));
+                return TRUE;
+            }
         }
         if (message == WM_KEYDOWN && wparam == VK_ESCAPE && picking_)
         {
@@ -1191,6 +1457,88 @@ class App
         return DefWindowProcW(hwnd, message, wparam, lparam);
     }
 
+    void MoveFromGrip(HWND hwnd, LPARAM position)
+    {
+        POINT cursor{GET_X_LPARAM(position), GET_Y_LPARAM(position)};
+        CheckWin32(ClientToScreen(hwnd, &cursor), "Cannot map corner-grip drag");
+        CheckWin32(SetWindowPos(pane_, nullptr, cursor.x - gripOffset_.x, cursor.y - gripOffset_.y, 0, 0,
+                                SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE),
+                   "Cannot move pane from its corner grip");
+    }
+
+    void EndGripDrag(HWND hwnd)
+    {
+        gripDragging_ = false;
+        if (GetCapture() == hwnd)
+        {
+            ReleaseCapture();
+        }
+    }
+
+    LRESULT OnGrip(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
+    {
+        if (message == WM_LBUTTONDOWN)
+        {
+            POINT cursor{GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam)};
+            RECT pane{};
+            CheckWin32(ClientToScreen(hwnd, &cursor) && GetWindowRect(pane_, &pane),
+                       "Cannot start corner-grip drag");
+            gripOffset_ = {cursor.x - pane.left, cursor.y - pane.top};
+            gripDragging_ = true;
+            SetFocus(hwnd);
+            SetCapture(hwnd);
+            CheckWin32(GetCapture() == hwnd, "Cannot capture corner-grip drag");
+            return 0;
+        }
+        if (message == WM_MOUSEMOVE && gripDragging_)
+        {
+            MoveFromGrip(hwnd, lparam);
+            return 0;
+        }
+        if (message == WM_LBUTTONUP && gripDragging_)
+        {
+            MoveFromGrip(hwnd, lparam);
+            EndGripDrag(hwnd);
+            SendMessageW(pane_, WM_EXITSIZEMOVE, 0, 0);
+            return 0;
+        }
+        if ((message == WM_CAPTURECHANGED || message == WM_CANCELMODE ||
+             (message == WM_KEYDOWN && wparam == VK_ESCAPE)) &&
+            gripDragging_)
+        {
+            EndGripDrag(hwnd);
+            return 0;
+        }
+        if (message == WM_CONTEXTMENU)
+        {
+            EndGripDrag(hwnd);
+            Menu(hwnd, false);
+            return 0;
+        }
+        if (message == WM_KEYDOWN && (wparam == VK_RETURN || wparam == VK_SPACE))
+        {
+            ShowControls();
+            return 0;
+        }
+        if (message == WM_COMMAND)
+        {
+            Command(LOWORD(wparam), HIWORD(wparam));
+            return 0;
+        }
+        if (message == WM_CLOSE)
+        {
+            EndGripDrag(hwnd);
+            TogglePane();
+            return 0;
+        }
+        if (message == WM_DPICHANGED)
+        {
+            // The owned grip follows the pane's DPI and bounds, not its own suggested rectangle.
+            return 0;
+        }
+        return DefWindowProcW(hwnd, message, wparam, lparam);
+    }
+
     LRESULT OnSnip(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
     {
         if (message == WM_KEYDOWN && wparam == VK_ESCAPE)
@@ -1210,8 +1558,9 @@ class App
             ShowWindow(hwnd, SW_HIDE);
             selectingSource_ = GetAncestor(WindowFromPoint(selectionStart_), GA_ROOT);
             ShowWindow(hwnd, SW_SHOW);
-            if (selectingSource_ == manager_ || selectingSource_ == pane_ || selectingSource_ == hwnd ||
-                selectingSource_ == GetDesktopWindow() || selectingSource_ == GetShellWindow())
+            if (selectingSource_ == manager_ || selectingSource_ == pane_ || selectingSource_ == grip_ ||
+                selectingSource_ == hwnd || selectingSource_ == GetDesktopWindow() ||
+                selectingSource_ == GetShellWindow())
             {
                 selectingSource_ = nullptr;
             }
@@ -1273,6 +1622,7 @@ class App
     HINSTANCE instance_{};
     HWND manager_{};
     HWND pane_{};
+    HWND grip_{};
     HWND snipper_{};
     HWND source_{};
     HWND allowedTestSource_{};
@@ -1285,6 +1635,7 @@ class App
     HBRUSH brush_{};
     HFONT font_{};
     HFONT heading_{};
+    HICON smallIcon_{};
     UINT dpi_{96};
     UINT taskbarCreated_{RegisterWindowMessageW(L"TaskbarCreated")};
     NOTIFYICONDATAW tray_{};
@@ -1296,18 +1647,23 @@ class App
     bool clickThrough_{};
     bool hasKeyColor_{};
     bool dragging_{};
-    int rate_{5};
+    bool resnipPressed_{};
+    bool gripDragging_{};
+    int rate_{CaptureRates.back()};
     std::wstring status_;
     std::wstring sourceState_;
+    CaptureState sourcePhase_{CaptureState::Waiting};
     std::wstring error_;
     POINT selectionStart_{};
     POINT selectionEnd_{};
+    POINT gripOffset_{};
     Rect desktop_{};
     Rect crop_{};
     Appearance appearance_;
     std::unique_ptr<Capture> capture_;
     std::vector<Pixel> lastFrame_;
     Surface surface_;
+    Surface gripSurface_;
     ULONGLONG started_{};
     std::uint64_t frames_{};
 };
@@ -1356,6 +1712,32 @@ int App::SelfTest(const std::filesystem::path& report, bool exportDemo)
             }
             ++checks;
         };
+        wchar_t executable[MAX_PATH]{};
+        CheckWin32(GetModuleFileNameW(nullptr, executable, MAX_PATH) != 0, "Cannot locate icon resources");
+        HICON extractedLarge{};
+        HICON extractedSmall{};
+        const UINT extracted = ExtractIconExW(executable, 0, &extractedLarge, &extractedSmall, 1);
+        const bool brandedIcons =
+            extracted > 0 && extractedLarge && extractedSmall && smallIcon_ &&
+            GetClassLongPtrW(manager_, GCLP_HICONSM) == reinterpret_cast<ULONG_PTR>(smallIcon_);
+        if (extractedLarge)
+        {
+            DestroyIcon(extractedLarge);
+        }
+        if (extractedSmall)
+        {
+            DestroyIcon(extractedSmall);
+        }
+        check(brandedIcons, "Executable and window class expose the embedded large and small branded icons");
+        check(rate_ == 60 && SendDlgItemMessageW(manager_, Rate, CB_GETCURSEL, 0, 0) ==
+                                 static_cast<LRESULT>(CaptureRates.size() - 1),
+              "New sessions default to the maximum selectable 60 fps update rate");
+        const auto selectRate = [&](int framesPerSecond) {
+            const auto index =
+                std::find(CaptureRates.begin(), CaptureRates.end(), framesPerSecond) - CaptureRates.begin();
+            SendDlgItemMessageW(manager_, Rate, CB_SETCURSEL, static_cast<WPARAM>(index), 0);
+            SendMessageW(manager_, WM_COMMAND, MAKEWPARAM(Rate, CBN_SELCHANGE), 0);
+        };
         WNDCLASSW fixtureClass{};
         fixtureClass.hInstance = instance_;
         fixtureClass.lpfnWndProc = Fixture::Proc;
@@ -1394,9 +1776,63 @@ int App::SelfTest(const std::filesystem::path& report, bool exportDemo)
               "Actual WGC crop matches blue fixture pixels");
         check(lastFrame_[30 * 180 + 30].r == 255 && lastFrame_[30 * 180 + 30].g == 255,
               "Window/client coordinate mapping retains the white fixture patch");
+        for (int framesPerSecond : {30, 60})
+        {
+            selectRate(framesPerSecond);
+            fixture.changed = !fixture.changed;
+            InvalidateRect(fixtureWindow, nullptr, FALSE);
+            UpdateWindow(fixtureWindow);
+            const int expectedRed = fixture.changed ? 225 : 20;
+            PumpUntil([&] { return !lastFrame_.empty() && lastFrame_[12 * 180 + 142].r == expectedRed; },
+                      6000);
+            check(rate_ == framesPerSecond && capture_ && capture_->Active() && error_.empty(),
+                  framesPerSecond == 30 ? "Selecting 30 fps during capture delivers updated source pixels"
+                                        : "Selecting 60 fps during capture delivers updated source pixels");
+        }
         check((GetWindowLongPtrW(pane_, GWL_STYLE) & WS_CAPTION) == 0 &&
                   (GetWindowLongPtrW(pane_, GWL_EXSTYLE) & WS_EX_TOPMOST) != 0,
               "Live pane has no caption and is always on top");
+        RECT gripBefore{};
+        RECT paneBefore{};
+        GetWindowRect(grip_, &gripBefore);
+        GetWindowRect(pane_, &paneBefore);
+        check(IsWindowVisible(grip_) && GetWindow(grip_, GW_OWNER) == pane_ &&
+                  gripBefore.right <= paneBefore.right && gripBefore.top >= paneBefore.top &&
+                  (GetWindowLongPtrW(grip_, GWL_EXSTYLE) & WS_EX_TRANSPARENT) == 0,
+              "Independent corner grip is visible, interactive and owned by the live pane");
+        const int gripCenter = gripSurface_.Width() / 2;
+        SendMessageW(grip_, WM_LBUTTONDOWN, MK_LBUTTON, MAKELPARAM(gripCenter, gripCenter));
+        SendMessageW(grip_, WM_MOUSEMOVE, MK_LBUTTON, MAKELPARAM(gripCenter + 36, gripCenter + 22));
+        SendMessageW(grip_, WM_LBUTTONUP, 0, MAKELPARAM(gripCenter, gripCenter));
+        RECT paneMoved{};
+        RECT gripMoved{};
+        GetWindowRect(pane_, &paneMoved);
+        GetWindowRect(grip_, &gripMoved);
+        check(paneMoved.left == paneBefore.left + 36 && paneMoved.top == paneBefore.top + 22 &&
+                  gripMoved.left - paneMoved.left == gripBefore.left - paneBefore.left &&
+                  gripMoved.top - paneMoved.top == gripBefore.top - paneBefore.top && !gripDragging_ &&
+                  GetCapture() != grip_,
+              "Real grip mouse path moves the pane, keeps its corner anchor and releases capture");
+        SendMessageW(grip_, WM_LBUTTONDOWN, MK_LBUTTON, MAKELPARAM(gripCenter, gripCenter));
+        SendMessageW(grip_, WM_KEYDOWN, VK_ESCAPE, 0);
+        check(!gripDragging_ && GetCapture() != grip_, "Escape safely cancels a corner-grip drag");
+        bool menuSeen{};
+        CheckWin32(SetPropW(grip_, L"WindowPane.TestMenuProbe", &menuSeen), "Cannot set owned menu probe");
+        CheckWin32(SetTimer(grip_, 2, 150,
+                            [](HWND hwnd, UINT, UINT_PTR, DWORD) {
+                                GUITHREADINFO state{sizeof(state)};
+                                auto* seen = static_cast<bool*>(GetPropW(hwnd, L"WindowPane.TestMenuProbe"));
+                                if (seen && GetGUIThreadInfo(GetCurrentThreadId(), &state))
+                                {
+                                    *seen = (state.flags & (GUI_INMENUMODE | GUI_POPUPMENUMODE)) != 0;
+                                }
+                                EndMenu();
+                            }) != 0,
+                   "Cannot start owned menu probe");
+        SendMessageW(grip_, WM_RBUTTONUP, 0, MAKELPARAM(gripCenter, gripCenter));
+        KillTimer(grip_, 2);
+        RemovePropW(grip_, L"WindowPane.TestMenuProbe");
+        check(menuSeen, "Right-clicking the corner grip opens the actual native options popup");
         surface_.SaveSyntheticBitmap(report.parent_path() / L"synthetic-original-pane.bmp");
         RECT paneBounds{};
         GetWindowRect(pane_, &paneBounds);
@@ -1418,10 +1854,11 @@ int App::SelfTest(const std::filesystem::path& report, bool exportDemo)
         check(appearance_.opacity == 50 && surface_.Pixels()[30 * surface_.Width() + 30].a == 128,
               "Actual opacity slider event changes premultiplied output alpha");
         SendMessageW(manager_, WM_COMMAND, PickColor, 0);
-        check(picking_, "Color-picker command enters preview mode");
+        check(picking_ && !IsWindowVisible(grip_),
+              "Color-picker preview hides the grip to expose source pixels");
         SendMessageW(pane_, WM_LBUTTONUP, 0, MAKELPARAM(4, 4));
         check(!picking_ && appearance_.keyEnabled && appearance_.key.r == 45 && appearance_.key.g == 126 &&
-                  appearance_.key.b == 230,
+                  appearance_.key.b == 230 && IsWindowVisible(grip_),
               "Picker mouse event samples the captured source color");
         check(surface_.Pixels()[0].a == 0 && surface_.Pixels()[30 * surface_.Width() + 30].a == 128,
               "Picked blue becomes transparent while white remains partially opaque");
@@ -1488,15 +1925,52 @@ int App::SelfTest(const std::filesystem::path& report, bool exportDemo)
         SendMessageW(manager_, WM_COMMAND, ClickThrough, 0);
         check((GetWindowLongPtrW(pane_, GWL_EXSTYLE) & WS_EX_TRANSPARENT) != 0,
               "Click-through checkbox changes the native pane style");
+        SendMessageW(opacity, TBM_SETPOS, TRUE, 0);
+        SendMessageW(manager_, WM_HSCROLL, TB_THUMBPOSITION, reinterpret_cast<LPARAM>(opacity));
+        RECT gripBounds{};
+        GetWindowRect(grip_, &gripBounds);
+        const POINT visibleGrip{(gripBounds.left + gripBounds.right) / 2,
+                                (gripBounds.top + gripBounds.bottom) / 2};
+        check(surface_.Pixels()[30 * surface_.Width() + 30].a == 0 && IsWindowVisible(grip_) &&
+                  WindowFromPoint(visibleGrip) == grip_ &&
+                  (GetWindowLongPtrW(pane_, GWL_EXSTYLE) & WS_EX_TRANSPARENT) != 0,
+              "Fully transparent click-through content retains a clickable corner grip");
+        GetWindowRect(pane_, &paneBefore);
+        SendMessageW(grip_, WM_LBUTTONDOWN, MK_LBUTTON, MAKELPARAM(gripCenter, gripCenter));
+        SendMessageW(grip_, WM_MOUSEMOVE, MK_LBUTTON, MAKELPARAM(gripCenter + 18, gripCenter + 16));
+        SendMessageW(grip_, WM_LBUTTONUP, 0, MAKELPARAM(gripCenter, gripCenter));
+        GetWindowRect(pane_, &paneMoved);
+        check(paneMoved.left == paneBefore.left + 18 && paneMoved.top == paneBefore.top + 16 &&
+                  (GetWindowLongPtrW(pane_, GWL_EXSTYLE) & WS_EX_TRANSPARENT) != 0 && !gripDragging_,
+              "Grip drag moves a fully transparent click-through pane without disabling click-through");
+        SendMessageW(opacity, TBM_SETPOS, TRUE, 50);
+        SendMessageW(manager_, WM_HSCROLL, TB_THUMBPOSITION, reinterpret_cast<LPARAM>(opacity));
+        SetWindowPos(pane_, nullptr, 0, 0, 360, 220, SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
+        surface_.SaveSyntheticBitmap(report.parent_path() / L"synthetic-grip-pane.bmp");
+        gripSurface_.SaveSyntheticBitmap(report.parent_path() / L"synthetic-grip.bmp");
+        GetWindowRect(pane_, &paneBounds);
+        GetWindowRect(grip_, &gripBounds);
+        std::ofstream gripLayout(report.parent_path() / L"synthetic-grip.json");
+        gripLayout << "{\"x\":" << gripBounds.left - paneBounds.left
+                   << ",\"y\":" << gripBounds.top - paneBounds.top << "}\n";
+        if (!gripLayout)
+        {
+            throw std::runtime_error("Cannot export owned grip geometry.");
+        }
+        gripLayout.close();
         SendMessageW(manager_, WM_COMMAND, Reset, 0);
         check(appearance_.opacity == 100 && !appearance_.keyEnabled && !clickThrough_,
               "Reset recovers transparent/click-through appearance");
-        SendMessageW(manager_, WM_COMMAND, HidePane, 0);
-        check(userHidden_ && !capture_ && !IsWindowVisible(pane_), "Hiding stops capture and hides the pane");
+        SendMessageW(grip_, WM_CLOSE, 0, 0);
+        check(userHidden_ && !capture_ && !IsWindowVisible(pane_) && IsWindow(grip_) &&
+                  !IsWindowVisible(grip_),
+              "Closing the grip hides/releases the pane without destroying its recovery control");
         SendMessageW(manager_, WM_COMMAND, HidePane, 0);
         PumpUntil([&] { return !lastFrame_.empty(); }, 6000);
-        check(capture_ && IsWindowVisible(pane_), "Show reconnects to the original source");
+        check(capture_ && IsWindowVisible(pane_) && IsWindowVisible(grip_),
+              "Show reconnects to the original source and restores its grip");
         BeginSnip();
+        check(!IsWindowVisible(grip_), "Snipping hides the grip instead of leaving an orphan overlay");
         SendMessageW(snipper_, WM_KEYDOWN, VK_ESCAPE, 0);
         check(!snipper_ && source_ == fixtureWindow && capture_,
               "Escape cancels snipping and restores the previous pane");
@@ -1516,13 +1990,60 @@ int App::SelfTest(const std::filesystem::path& report, bool exportDemo)
 
         RECT resized{};
         GetWindowRect(fixtureWindow, &resized);
+        CheckDlgButton(manager_, ClickThrough, BST_CHECKED);
+        SendMessageW(manager_, WM_COMMAND, ClickThrough, 0);
         SetWindowPos(fixtureWindow, nullptr, 0, 0, resized.right - resized.left + 32,
                      resized.bottom - resized.top, SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
         PumpUntil([&] { return sourceState_.find(L"resized") != std::wstring::npos; }, 6000);
         check(!capture_ && lastFrame_.empty(), "Source resize stops the invalid geometric crop explicitly");
-        StartCurrent();
+        SetWindowPos(pane_, nullptr, 0, 0, 560, 240, SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
+        Render();
+        const RECT button = ResnipButton();
+        const POINT buttonCenter{(button.left + button.right) / 2, (button.top + button.bottom) / 2};
+        POINT buttonScreen = buttonCenter;
+        ClientToScreen(pane_, &buttonScreen);
+        check(button.right > button.left &&
+                  SendMessageW(pane_, WM_NCHITTEST, 0, MAKELPARAM(buttonScreen.x, buttonScreen.y)) ==
+                      HTCLIENT &&
+                  (GetWindowLongPtrW(pane_, GWL_EXSTYLE) & WS_EX_TRANSPARENT) == 0,
+              "Resized-source recovery button is a client hit target even with click-through enabled");
+        surface_.SaveSyntheticBitmap(report.parent_path() / L"synthetic-recovery-pane.bmp");
+        const auto clickResnip = [&] {
+            SendMessageW(pane_, WM_LBUTTONDOWN, MK_LBUTTON, MAKELPARAM(buttonCenter.x, buttonCenter.y));
+            SendMessageW(pane_, WM_LBUTTONUP, 0, MAKELPARAM(buttonCenter.x, buttonCenter.y));
+        };
+        SendMessageW(pane_, WM_LBUTTONDOWN, MK_LBUTTON, MAKELPARAM(buttonCenter.x, buttonCenter.y));
+        SendMessageW(pane_, WM_LBUTTONUP, 0, MAKELPARAM(button.right + 4, buttonCenter.y));
+        check(!snipper_ && !resnipPressed_ && GetCapture() != pane_,
+              "Releasing outside the recovery button cancels activation and releases mouse capture");
+        clickResnip();
+        check(snipper_ && !IsWindowVisible(pane_), "In-pane Snip again opens the actual selection overlay");
+        SendMessageW(snipper_, WM_KEYDOWN, VK_ESCAPE, 0);
+        check(!snipper_ && !capture_ && NeedsResnip() && IsWindowVisible(pane_) && error_.empty(),
+              "Cancelling re-snipping preserves the resized-source recovery pane without restarting an "
+              "invalid crop");
+        for (const int key : {VK_RETURN, VK_SPACE})
+        {
+            SendMessageW(pane_, WM_KEYDOWN, key, 0);
+            check(snipper_ != nullptr, "Recovery action supports Enter and Space");
+            SendMessageW(snipper_, WM_KEYDOWN, VK_ESCAPE, 0);
+        }
+        SetWindowPos(pane_, nullptr, 0, 0, 64, 48, SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
+        const RECT compact = ResnipButton();
+        check(compact.left >= 0 && compact.top >= 0 && compact.right <= 64 && compact.bottom <= 48 &&
+                  compact.right > compact.left && compact.bottom > compact.top && !IsWindowVisible(grip_),
+              "Minimum-sized recovery remains usable without the grip covering its action");
+        SetWindowPos(pane_, nullptr, 0, 0, 560, 240, SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
+        clickResnip();
+        selector = snipper_;
+        SendMessageW(selector, WM_LBUTTONDOWN, MK_LBUTTON, at(0, 0));
+        SendMessageW(selector, WM_MOUSEMOVE, MK_LBUTTON, at(180, 110));
+        SendMessageW(selector, WM_LBUTTONUP, 0, at(180, 110));
         PumpUntil([&] { return !lastFrame_.empty(); }, 6000);
+        check(source_ == fixtureWindow && capture_ && !NeedsResnip() && ResnipButton().right == 0,
+              "Completing in-pane re-snipping restores live pixels and removes recovery chrome");
 
+        selectRate(5);
         FILETIME creation{}, exit{}, kernelStart{}, userStart{}, kernelEnd{}, userEnd{};
         CheckWin32(GetProcessTimes(GetCurrentProcess(), &creation, &exit, &kernelStart, &userStart),
                    "Cannot measure fixture CPU time");
@@ -1557,10 +2078,11 @@ int App::SelfTest(const std::filesystem::path& report, bool exportDemo)
         CheckWin32(GetProcessMemoryInfo(GetCurrentProcess(),
                                         reinterpret_cast<PROCESS_MEMORY_COUNTERS*>(&memory), sizeof(memory)),
                    "Cannot measure preview process memory");
-        log << "OBSERVATION fixture=180x110 rate=5fps duration_ms=" << measuredMilliseconds
+        log << "OBSERVATION fixture=180x110 rate=" << rate_ << "fps duration_ms=" << measuredMilliseconds
             << " frames=" << frames_ - initialFrames << " cpu_percent_one_core=" << cpuOneCorePercent
             << " working_set_bytes=" << memory.WorkingSetSize << " private_bytes=" << memory.PrivateUsage
             << '\n';
+        selectRate(CaptureRates.back());
         if (exportDemo)
         {
             const auto directory = report.parent_path() / L"demo-frames";
@@ -1638,6 +2160,11 @@ int App::SelfTest(const std::filesystem::path& report, bool exportDemo)
         fixtureWindow = nullptr;
         PumpUntil([&] { return sourceState_.find(L"closed") != std::wstring::npos; }, 4000);
         check(!capture_ && lastFrame_.empty(), "Source closure stops capture without keeping old data");
+        SendMessageW(pane_, WM_KEYDOWN, VK_RETURN, 0);
+        check(snipper_ != nullptr, "Closed-source recovery offers the same in-pane selection action");
+        SendMessageW(snipper_, WM_KEYDOWN, VK_ESCAPE, 0);
+        check(!capture_ && NeedsResnip() && IsWindowVisible(pane_) && error_.empty(),
+              "Cancelling after source closure keeps recovery visible without capturing a dead window");
         log << "RESULT " << checks << " native integration checks passed\n";
         return 0;
     }

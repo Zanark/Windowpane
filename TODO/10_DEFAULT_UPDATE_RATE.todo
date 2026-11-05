@@ -1,0 +1,39 @@
+WindowPane default update rate
+
+Status: DONE
+Milestone: Default to the highest selectable 60 fps target
+Dependencies: 02_NATIVE_CAPTURE.todo, 03_DESKTOP_CONTROLS.todo
+Purpose: Make the live pane update more frequently by default.
+
+Tasks:
+- [x] Support 1, 5, 10, 30 and 60 fps with a shared allowed-rate list.
+- [x] Default the controls, timer and new capture sessions to 60 fps.
+- [x] Use sub-millisecond capture-interval precision for 30/60 fps.
+- [x] Qualify default selection and live changes through native handlers.
+- [x] Refresh controls imagery, guides, ledger and owned continuity.
+
+Acceptance criteria:
+- New sessions select 60 fps; both 30/60 fps work during capture.
+- Existing lower rates remain selectable; invalid selections report errors.
+- Documentation distinguishes requested cadence from measured throughput.
+- Historical 5 fps fixture observations are not relabeled as 60 fps results.
+
+Completion evidence:
+- Release /W4 /WX build passes 18 pure cases and 47 native checks.
+- New-session controls select 60 fps. Actual 30/60 fps selection handlers
+  retain active capture and deliver newly repainted synthetic source pixels.
+- Optional native demo passes 46 checks; ordinary startup/tray/recovery/exit
+  smoke passes. Refreshed controls screenshot visibly selects 60 fps / maximum.
+- Formatting, whitespace, local documentation/media links and refreshed native
+  GIF decoding pass. Resource fixture explicitly selects 5 fps, then restores
+  60 fps; its results are not measurements of 60 fps throughput.
+- Executable: C:\devdesk\homedesk\Windowpane\build\Release\WindowPane.exe
+  450560 bytes; SHA256
+  417895643CE9874223D0CAD81470E0192E152DB6D69AC06E57A11C481BAB9C3E.
+- Actual cadence remains source/Windows dependent; no guaranteed measured
+  frame rate, installation, commit or publication is claimed.
+
+Completion log:
+- 2026-11-06: User requested 60 fps by default, or the maximum supported rate.
+- 2026-11-06: Added 30/60 fps, shared allowed rates, maximum default and
+  100-nanosecond capture interval precision; qualified and documented locally.

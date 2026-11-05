@@ -21,8 +21,8 @@ try {
         Start-Sleep -Milliseconds 100
         $process.Refresh()
         $window = $process.MainWindowHandle
-    } while (-not $window -and -not $process.HasExited -and (Get-Date) -lt $deadline)
-    if (-not $window -or $process.HasExited) { throw 'Normal controls did not become ready.' }
+    } while ($window -eq [IntPtr]::Zero -and -not $process.HasExited -and (Get-Date) -lt $deadline)
+    if ($window -eq [IntPtr]::Zero -or $process.HasExited) { throw 'Normal controls did not become ready.' }
     if (-not [WindowPaneSmoke]::IsWindowVisible($window)) { throw 'Controls are not visible.' }
     if (-not [WindowPaneSmoke]::PostMessageW($window, 0x0010, [UIntPtr]::Zero, [IntPtr]::Zero)) {
         throw 'Cannot exercise close-to-tray.'

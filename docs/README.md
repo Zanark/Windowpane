@@ -10,6 +10,7 @@ book edition or a claim of exhaustive source annotation.
 
 The [TODO index](../TODO/00_INDEX.todo) tracks bounded work.
 The [development ledger](../TODO/05_DEVELOPMENT_LEDGER.todo) explains changes and failures.
-The [README visual walkthrough](../README.md#visual-walkthrough) shows four native
-demo GIFs; [asset provenance](assets/README.md) explains the synthetic sources,
-annotations, playback timing and reproduction path.
+The [README visual walkthrough](../README.md#visual-walkthrough) shows two
+source-to-pane/workspace illustrations and four native demo GIFs;
+[asset provenance](assets/README.md) distinguishes authored illustrations from
+native exports and explains annotations, timing and reproduction.

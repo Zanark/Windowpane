@@ -2,6 +2,7 @@
 
 #include "pixels.hpp"
 
+#include <array>
 #include <windows.h>
 #include <d3d11.h>
 #include <winrt/Windows.Foundation.h>
@@ -10,6 +11,8 @@
 
 namespace windowpane
 {
+inline constexpr std::array CaptureRates{1, 5, 10, 30, 60};
+
 enum class CaptureState
 {
     Waiting,

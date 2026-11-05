@@ -1,6 +1,7 @@
 """Build README media from explicitly exported native synthetic demo surfaces."""
 
 import argparse
+import json
 from pathlib import Path
 import struct
 
@@ -143,6 +144,24 @@ def main():
         card(groups[family][index], title, detail, labels[index]).save(destination / name)
     for name in ("default", "picker", "keyed"):
         native_bitmap(args.input / f"controls-{name}.bmp").save(destination / f"controls-{name}.png")
+    pane = native_bitmap(args.input.parent / "synthetic-grip-pane.bmp")
+    grip = native_bitmap(args.input.parent / "synthetic-grip.bmp")
+    layout = json.loads((args.input.parent / "synthetic-grip.json").read_text(encoding="utf-8"))
+    x, y = layout["x"], layout["y"]
+    if not (0 <= x <= pane.width - grip.width and 0 <= y <= pane.height - grip.height):
+        raise ValueError("Native grip evidence must fit inside the owned pane.")
+    pane.alpha_composite(grip, (x, y))
+    preview = card(
+        pane, "A little corner to grab",
+        "Drag the grip to move. Right-click it for options.",
+        "Actual native surfaces | grip stays visible independently of opacity / click-through",
+    )
+    draw = ImageDraw.Draw(preview)
+    target_x = 28 + (664 - pane.width) // 2 + x + grip.width // 2
+    target_y = 132 + (236 - pane.height) // 2 + y + grip.height // 2
+    draw.text((610, target_y - 10), "Grip", font=font(16), fill=ACCENT)
+    draw.line((600, target_y, target_x + 18, target_y), fill=ACCENT, width=2)
+    preview.save(destination / "corner-grip.png")
     hero = Image.new("RGB", (1440, 820), BACKGROUND)
     for index, (name, _, _) in enumerate(stills[:4]):
         with Image.open(destination / name) as image:
@@ -157,7 +176,7 @@ def main():
             ((index % 2) * 720, (index // 2) * 410),
         )
     review.save(ROOT / "build" / "demo-review.png")
-    print(f"Exported 4 GIFs and 9 PNGs to {destination}")
+    print(f"Exported 4 GIFs and 10 PNGs to {destination}")
 
 
 if __name__ == "__main__":

@@ -7,6 +7,7 @@
 #include <winrt/Windows.Foundation.Metadata.h>
 #include <winrt/Windows.Graphics.DirectX.h>
 
+#include <algorithm>
 #include <cstring>
 #include <stdexcept>
 
@@ -103,14 +104,14 @@ void Capture::Start(HWND source, Rect crop, int framesPerSecond)
 
 void Capture::SetRate(int framesPerSecond)
 {
-    if (framesPerSecond != 1 && framesPerSecond != 5 && framesPerSecond != 10)
+    if (std::find(CaptureRates.begin(), CaptureRates.end(), framesPerSecond) == CaptureRates.end())
     {
-        throw std::invalid_argument("Capture rate must be 1, 5 or 10 frames per second.");
+        throw std::invalid_argument("Capture rate must be 1, 5, 10, 30 or 60 frames per second.");
     }
     if (session_ && winrt::Windows::Foundation::Metadata::ApiInformation::IsPropertyPresent(
                         L"Windows.Graphics.Capture.GraphicsCaptureSession", L"MinUpdateInterval"))
     {
-        session_.MinUpdateInterval(std::chrono::milliseconds(1000 / framesPerSecond));
+        session_.MinUpdateInterval(winrt::Windows::Foundation::TimeSpan{10'000'000 / framesPerSecond});
     }
 }
 

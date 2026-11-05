@@ -1,0 +1,37 @@
+In-pane recovery action
+
+Status: DONE
+Milestone: Re-snip directly from an invalid-source pane
+Dependencies: 03_DESKTOP_CONTROLS.todo
+Purpose: Make the source-resized/closed message actionable without finding controls.
+
+Tasks:
+- [x] Draw a compact Snip again action inside resized/closed-source placeholders.
+- [x] Wire real pointer, focus/keyboard, capture cancellation and selection paths.
+- [x] Temporarily suspend click-through for actionable recovery placeholders.
+- [x] Preserve the placeholder when selection is cancelled after resize/closure.
+- [x] Run native regression checks and inspect the owned recovery screenshot.
+- [x] Update user documentation, evidence, ledger and owned continuity.
+
+Acceptance criteria:
+- Clicking Snip again opens selection without introducing normal-view chrome.
+- Enter/Space activate recovery; releasing a press outside does not activate.
+- A minimum-sized pane retains a usable compact action.
+- Click-through cannot make the recovery action unreachable.
+- Cancel preserves recovery; a successful snip restores the normal live view.
+- No private surfaces are captured for tests or documentation.
+
+Completion evidence:
+- scripts\build.ps1 -Test passed Release /W4 /WX, 18 pure cases and 36 native
+  checks, including real recovery hit testing, pointer/keyboard selection,
+  cancellation, minimum bounds, click-through override and return to live view.
+- docs\assets\recovery-pane.png is the inspected actual native fixture surface.
+- README and user/verification guides document recovery and its input behavior.
+- No normal-view title bar, toolbar, private capture or publication was added.
+
+Completion log:
+- 2026-11-06: User showed an unactionable source-resized message and requested
+  an in-place way to snip again. Scoped recovery to resized/closed sources.
+- 2026-11-06: Added drawn native recovery action, client hit testing, press/release
+  capture, Enter/Space and temporary click-through suspension. Cancellation
+  restores unavailable placeholders rather than restarting invalid/dead sources.

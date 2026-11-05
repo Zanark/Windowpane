@@ -1,3 +1,5 @@
+<img src="assets/windowpane.svg" width="88" height="88" alt="WindowPane overlapping-window logo">
+
 # WindowPane
 
 ### A little window into any window.
@@ -9,7 +11,11 @@ background color entirely.
 
 Native Windows. No embedded browser. No sign-in. No account or cookie access.
 
-![Four actual WindowPane output states: opaque, faded, blue removed, and blue removed with fading](docs/assets/showcase.png)
+![Animated illustration: select a region in a demo source window, connect it to a small floating pane, and keep both views updating](docs/assets/illustration-snip.gif)
+
+*Animated illustration: the green outline marks the source region; the yellow
+outline identifies its floating mirror. Windows, values and cursor motion are
+fictional demonstration artwork, not a recording or private account.*
 
 **Local preview:** one pane, session-only settings, unsigned executable.
 There is no installer or published release yet.
@@ -18,11 +24,12 @@ There is no installer or published release yet.
 [Controls](#controls-and-shortcuts) · [Screenshots](#screenshot-gallery) ·
 [Limitations](#what-to-expect) · [Development](#development)
 
-> **About the visuals:** all examples use our original synthetic test window,
-> not a real account or private desktop. GIFs sequence actual native capture and
-> compositor exports; they are paced demonstrations, **not mouse recordings or
-> performance measurements**. Captions and checkerboards are documentation
-> overlays, not chrome attached to the floating pane.
+> **About the visuals:** the two contextual animations are explicitly labeled
+> illustrations with fictional windows and demo data. The four native-output
+> GIFs below sequence actual capture/compositor exports from our synthetic test
+> window. Neither kind is a mouse recording or performance measurement. Outlines,
+> connector lines, captions and checkerboards explain the feature; they are not
+> permanent chrome on the live pane. No private account or desktop is shown.
 
 ## What it does
 
@@ -31,12 +38,13 @@ There is no installer or published release yet.
 | Snip a window region | Select just the area you want; cancel without replacing an existing pane |
 | Stay above your workspace | A titlebar-free, always-on-top live view |
 | Move and resize | Drag visible content, resize at an edge or corner, snap near work-area edges |
+| Corner grip | A small frosted-look handle for dragging and right-click options, even with transparent or click-through content |
 | Overall opacity | Fade the entire pane, background included |
 | Picked-color transparency | Sample a background from the live pane and make matching pixels transparent |
 | Tolerance and soft edges | Widen the color match and feather its boundary |
 | Click-through | Let clicks reach the app underneath instead of moving the pane |
 | Hide and recover | Tray controls, global shortcuts and an appearance reset |
-| Adjustable update rate | 1, 5 or 10 fps; 5 fps is the default |
+| Adjustable update rate | 60 fps by default (maximum); 1, 5, 10 and 30 fps are also available |
 | Local-only operation | No network client, telemetry, browser integration or normal-operation recording |
 
 For example, keep a small dashboard tile or progress indicator visible while
@@ -74,18 +82,47 @@ The capture API baseline is Windows 10 version 1903. Qualification so far is
 limited to the development machine; this is not a clean-machine compatibility
 guarantee.
 
+### Publish a preview with GitHub Actions
+
+An authorized maintainer can open **Actions → Manual preview release → Run
+workflow**. Leave the tag blank for a unique `preview-<run-id>` tag, or supply
+a new tag such as `v0.1.0-preview.2`.
+
+The workflow builds Windows x64, runs headless pixel tests and publishes an
+unsigned **pre-release** with the EXE, portable ZIP and SHA-256 checksums.
+It verifies the uploaded draft downloads before making the release public.
+**It runs only manually**, never on a push or schedule. Native capture/UI
+tests still require local desktop qualification.
+
+The current source, workflow and portable guide must first be committed/pushed
+to the default branch by an account with write access.
+See [release automation](docs/04-development-and-verification.md#manual-github-release-workflow)
+for permissions and failure recovery.
+
 ### Your first pane
 
 1. Open the source application and make the desired content visible.
 2. Click **Snip a window region**, or press **Ctrl+Alt+N**.
 3. Start dragging inside that source window; release around the desired region.
-4. Drag the resulting live pane into place. Its controls are separate, so the
-   floating view has no permanent title bar or toolbar.
+4. Drag the little dotted grip in its upper-right corner to move it into place.
+   Right-click that grip for options. There is no permanent title bar or toolbar.
 
 **Escape** or right-click cancels a snip. A successful new snip replaces the
 current pane; cancelling keeps it.
 
 ## Visual walkthrough
+
+### From the source to your workspace
+
+The opening animation shows **select → float → update**, with connector lines
+between the source rectangle and its smaller mirror. This second illustration
+shows the pane above a different app: **move → fade → remove blue**.
+
+![Animated illustration of a small live pane moving over a different workspace, fading, and retaining white text after blue is removed](docs/assets/illustration-workspace.gif)
+
+*The work surface, sample build progress and pointer are authored illustrations.
+The source still needs to remain open and rendering. The following examples
+switch to actual native WindowPane output.*
 
 ### 1. Keep a live region in view
 
@@ -134,9 +171,31 @@ margins where the pane's shape differs from the selected crop.
 
 ![Native pane resize sequence showing aspect-preserving composition](docs/assets/demo-resize.gif)
 
-Drag visible content to move the pane. Releasing near a monitor's work-area
+Drag the corner grip or visible content to move the pane. Releasing near a monitor's work-area
 edge snaps it into place. **Resizing the pane** scales the view; **resizing the
 source window** invalidates the selection and requires a new snip.
+
+**Update rate** defaults to **60 fps**, the highest selectable target. Actual
+updates depend on source rendering and Windows capture/timer scheduling; this
+is not a guaranteed measured frame rate. Select a lower rate to reduce work,
+especially with larger panes.
+
+### A small corner to grab
+
+The upper-right dotted grip gives you a place to **left-drag to move** and
+**right-click for options**. It stays visible and interactive independently of
+the mirrored content's opacity, picked-color transparency and click-through.
+Clicking the grip also gives it focus; **Enter** or **Space** opens controls.
+
+![Actual native pane and corner-grip surfaces, with blue removed and content at 50 percent opacity](docs/assets/corner-grip.png)
+
+*The frosted-look tint is translucent, not live backdrop blur. This reference
+combines the two actual native surfaces at their recorded relative position;
+the checkerboard and arrow are documentation annotations.*
+
+The grip hides with the pane and temporarily gets out of the way while snipping
+or picking a color. In a tiny recovery pane it also yields if it would cover the
+**Snip** button.
 
 ## Controls and shortcuts
 
@@ -153,23 +212,47 @@ These are captures of the actual controls, not mockups:
 | **Ctrl+Alt+W** | Hide/show the pane |
 | **Ctrl+Alt+O** | Open controls |
 | **Escape** | Cancel snipping or color picking |
-| Right-click the pane | Open the pane menu |
+| Left-drag the corner grip | Move the pane, including when its content is click-through |
+| Right-click the grip or interactive pane content | Open the pane menu |
 | Double-click the tray icon | Open controls |
 | **Reset appearance** | Restore opacity, disable color removal and click-through, and show a hidden pane |
 | **Exit WindowPane** in the menu | Stop the app; closing controls normally only hides them to the tray |
 
 **Click-through** sends mouse input to the application *underneath* the pane.
-It does not interact with or forward clicks to the captured source. Disable it
-through controls before trying to drag the pane again.
+It does not interact with or forward clicks to the captured source. The corner
+grip remains interactive, so you do not need to disable click-through to move
+the pane or open its menu.
 
 At zero opacity or with fully transparent pixels, the pane may have nothing
-clickable. Use **Ctrl+Alt+O**, the tray, or **Reset appearance** to recover.
+clickable in its content. Use the corner grip, **Ctrl+Alt+O**, the tray, or
+**Reset appearance** to recover.
 Shortcut conflicts produce a visible warning; tray and controls remain available.
+
+### Snip again right where the problem appears
+
+If the source is resized or closed, its message now includes a **Snip again**
+button inside the floating pane. Click it to start a new selection without
+finding the controls window. With the pane focused, **Enter** or **Space** also
+activates it.
+
+![Actual native resized-source message with an in-pane Snip again button](docs/assets/recovery-pane.png)
+
+Click-through is temporarily suspended for this recovery state so the button
+remains clickable. Cancelling selection restores the same message; completing
+a new snip returns to the titlebar-free live view with no recovery button.
+Very small panes use the compact label **Snip**.
 
 ## Screenshot gallery
 
 <details>
 <summary><strong>Five still-image references: original, opacity, color removal, combined effects and aspect fit</strong></summary>
+
+### Native-output overview
+
+These are actual native outputs in annotated reading cards, unlike the
+fictional-window illustrations above.
+
+![Four actual WindowPane output states: opaque, faded, blue removed, and blue removed with fading](docs/assets/showcase.png)
 
 ### Original captured region
 
@@ -223,8 +306,8 @@ independently, and it does not track a particular number or card after scrolling
 | Open and rendering | Displays the latest received pixels |
 | Moved | Keeps the crop relative to the source window |
 | Minimized or hidden | Clears old pixels, shows an unavailable message; restore/show resumes |
-| Resized | Stops the invalid crop and asks for a fresh snip |
-| Closed | Stops capture and asks for a new source |
+| Resized | Stops the invalid crop; **Snip again** starts a fresh selection |
+| Closed | Stops capture; **Snip again** lets you select a new source |
 | Pane hidden through WindowPane | Releases capture; showing reconnects to the source |
 
 Some applications stop rendering while inactive. Protected content can appear
@@ -253,10 +336,10 @@ are not qualified. Human usability acceptance is still pending.
 
 | Symptom | What to do |
 |---|---|
-| Pane is invisible or cannot be dragged | Open controls; reset appearance or disable click-through |
+| Pane content is invisible or cannot be dragged | Use its corner grip, or open controls and reset appearance |
 | Nothing updates | Check that the source is open, visible and actually rendering new content |
 | Wrong content appears after scrolling or a tab change | Return the source to the intended content, or snip again |
-| Source-resized message | Snip the region again at the new source size |
+| Source-resized or source-closed message | Click **Snip again** inside that pane |
 | Foreground disappears after picking a color | Reduce tolerance, choose a different key, or disable color removal |
 | Colored fringes remain around text | Adjust tolerance/soft edge; perfect background reconstruction is not provided |
 | Build cannot replace `WindowPane.exe` | Exit the running app through its menu, then rebuild |
@@ -284,3 +367,6 @@ See the [verification notes](docs/04-development-and-verification.md) for scope.
 
 All media is local to this repository. No third-party GIFs, private dashboard
 captures or external image-hosting requests are required to read this guide.
+The original [SVG logo](assets/windowpane.svg), [PNG logo](assets/windowpane.png)
+and multi-size [favicon/Windows icon](assets/favicon.ico) are included. The icon
+is embedded in the executable and used by its controls and system tray.

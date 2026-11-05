@@ -1,0 +1,34 @@
+Animated source-to-pane illustrations
+
+Status: DONE
+Milestone: Explain the product in context instead of only isolated pixel states
+Dependencies: 06_VISUAL_README.todo
+Purpose: Visually connect a selected source region with a small floating mirror.
+
+Tasks:
+- [x] Create original animated source-region, selection and mirror diagrams.
+- [x] Show the pane over a synthetic work surface, moving/fading/keying.
+- [x] Label illustrations separately from actual native captures and recordings.
+- [x] Inspect decoded animation, update README/navigation and asset provenance.
+
+Acceptance criteria:
+- Source-region outline and connector lines explain where the pane comes from.
+- Animations show an identifiable small floating view in a larger workspace.
+- All data, windows and artwork are invented public-safe demonstration content.
+- No private account screenshot is copied into public documentation.
+
+Completion evidence:
+- scripts\export-illustrations.py generates two original, labeled GIFs.
+- Decoded 1120x700 source-to-pane/workspace samples visually inspected across
+  selection, connectors, updates, dragging, fading and removing blue.
+- GIFs contain 16 and 26 distinct decoded states, loop, and preserve total
+  durations of 6600/7920ms. Repeated authored states are combined by the encoder.
+- README now embeds six GIFs and ten PNGs; local guide/media links resolve.
+- No reference screenshot, private account data or third-party artwork copied.
+
+Completion log:
+- 2026-11-06: User supplied a source-region-to-floating-pane annotated reference
+  and requested animated representations in that style in the README.
+- 2026-11-06: Replaced the lead isolated-output montage with an animated
+  source-to-pane explanation. Added a separate workspace/move/fade/key animation;
+  retained actual native-output evidence and distinguished its provenance.

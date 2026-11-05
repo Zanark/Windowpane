@@ -4,7 +4,7 @@ $root = Split-Path $PSScriptRoot -Parent
 $destination = Join-Path $root 'docs\assets'
 [void](New-Item $destination -ItemType Directory -Force)
 
-foreach ($name in @('original-pane', 'keyed-pane', 'controls')) {
+foreach ($name in @('original-pane', 'keyed-pane', 'controls', 'recovery-pane')) {
     $inputPath = Join-Path $root "build\synthetic-$name.bmp"
     if (-not (Test-Path $inputPath)) { throw "Run the native synthetic test first: $inputPath" }
     $bytes = [IO.File]::ReadAllBytes($inputPath)
@@ -22,8 +22,8 @@ foreach ($name in @('original-pane', 'keyed-pane', 'controls')) {
         [Runtime.InteropServices.Marshal]::Copy($bytes, $offset, $locked.Scan0, $width * $height * 4)
     } finally { $image.UnlockBits($locked) }
     try {
-        if ($name -eq 'controls') {
-            $image.Save((Join-Path $destination 'controls.png'), [Drawing.Imaging.ImageFormat]::Png)
+        if ($name -in @('controls', 'recovery-pane')) {
+            $image.Save((Join-Path $destination "$name.png"), [Drawing.Imaging.ImageFormat]::Png)
         } else {
             $image.Save((Join-Path $destination "synthetic-$name-alpha.png"), [Drawing.Imaging.ImageFormat]::Png)
             $preview = [Drawing.Bitmap]::new($width, $height)

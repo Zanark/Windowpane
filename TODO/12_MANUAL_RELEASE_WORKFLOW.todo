@@ -1,0 +1,42 @@
+WindowPane manual GitHub release workflow
+
+Status: DONE
+Milestone: Manually dispatched, checksum-verified preview publication
+Dependencies: 10_DEFAULT_UPDATE_RATE.todo, 11_PORTABLE_PREVIEW.todo
+Purpose: Create a GitHub preview release only when an authorized user runs it.
+
+Tasks:
+- [x] Confirm manual-only triggering and inspect hosted/action compatibility.
+- [x] Add Windows build/headless tests, portable packaging and SHA-256 assets.
+- [x] Separate read-only build from a contents-write publisher.
+- [x] Create a new tag at the built commit, verify draft downloads, then publish.
+- [x] Validate workflow syntax and actual local build/test/packaging steps.
+- [x] Document operation, failure boundaries and update owned continuity.
+
+Acceptance criteria:
+- No push, pull-request, release-event or scheduled trigger.
+- Blank tag generates a unique run-ID preview tag; supplied tags are validated.
+- Existing tags are not reused or overwritten.
+- Failed build/test/checksum checks cannot publish an incomplete release.
+- Actions are pinned; only publication receives contents-write permission.
+- Hosted headless tests are not claimed as native capture/UI qualification.
+- No local authentication switch, push or live workflow run is implied.
+
+Completion evidence:
+- actionlint 1.7.12 passes; checksum-verified linter is session-local, not a
+  project/runtime dependency. Publisher Bash syntax passes.
+- Actual workflow PowerShell blocks accept automatic/custom tags and reject
+  path-like, invalid-ref and option-like inputs. Build and 18 pixel cases pass.
+- Actual packaging block produces the intended two-entry portable ZIP;
+  contents match the executable and tracked guide. Hashes verify in GNU
+  sha256sum, with an explicit LF-only manifest for the Linux publisher.
+- Structural checks confirm manual-only trigger, scoped permissions and pinned
+  actions. Local documentation links and whitespace checks pass.
+- Hosted Windows manifest lists required VS2022/SDK; action inputs verified at
+  pinned commits. No hosted run, live tag/release creation or publication tested:
+  current GitHub account remains read-only. Source/workflow are uncommitted.
+
+Completion log:
+- 2026-11-06: User chose "Manual workflow run only" for release automation.
+- 2026-11-06: Implemented and locally qualified; remote activation requires an
+  authorized source/workflow push and manual dispatch.

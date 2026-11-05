@@ -97,8 +97,10 @@ composition DIB are retained; Windows also owns capture surfaces for the source
 window. Source-window size, monitor/GPU and app activity affect resource use.
 
 Interactive resizing is capped at 2048 pixels per pane side; image functions
-defensively reject dimensions over 4096. Default polling is 5 fps, adjustable to
-1 or 10 fps. Hiding the pane releases the capture session.
+defensively reject dimensions over 4096. The default update target is 60 fps
+(the maximum option), adjustable to 1, 5, 10 or 30 fps. Actual cadence depends
+on source rendering and Windows capture/timer scheduling. Hiding the pane
+releases the capture session.
 
 The first implementation favors small, understandable native code over a
 custom GPU shader pipeline. A future measured bottleneck could justify moving

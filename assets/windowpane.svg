@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">WindowPane - a little window into any window</title>
+  <rect x="4" y="4" width="120" height="120" rx="28" fill="#111825"/>
+  <rect x="23" y="24" width="60" height="58" rx="10" fill="#172f3d" stroke="#50e1c2" stroke-width="5"/>
+  <rect x="43" y="45" width="62" height="58" rx="10" fill="#e6eef9" stroke="#111825" stroke-width="5"/>
+  <rect x="52" y="54" width="44" height="10" rx="3" fill="#2a756f"/>
+  <rect x="52" y="71" width="44" height="23" rx="4" fill="#50e1c2"/>
+</svg>

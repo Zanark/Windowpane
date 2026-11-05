@@ -1,6 +1,6 @@
 # 2. Architecture and design boundaries
 
-## One native process, three visible surfaces
+## Native process and capture surfaces
 
 ```mermaid
 flowchart TD
@@ -81,7 +81,22 @@ copy/readback; only the current cropped CPU buffer remains for rendering/picking
 
 **Recovery independent of content.** Pane controls are deliberately separate:
 fully transparent or click-through content cannot be its own sole recovery
-surface. The manager, global shortcut and tray remain available.
+surface. The manager, global shortcut and tray remain available. A small owned
+layered popup, `WindowPane.CornerGrip`, provides a persistent drag/options anchor.
+It is a separate HWND because content-wide `WS_EX_TRANSPARENT`, opacity or
+color-keying must not disable its input or erase it. The grip's own premultiplied
+surface draws a translucent tint, edge and dots; it does not sample the desktop
+or apply true backdrop blur.
+
+Owner movement/resizing synchronizes the grip's upper-right position and DPI.
+Pointer capture drives actual pane movement; release reuses work-area snapping.
+Right-click opens the existing native options menu. Hide, snipping and color
+picking hide the grip too. A compact recovery action takes priority if its
+rectangle would overlap the grip. The source selector excludes the grip itself.
+
+**Original embedded branding.** `scripts\export-branding.py` generates the
+SVG/PNG logo and multi-size ICO from original shapes. `src\app.rc` embeds the
+icon resource; window classes and the tray load it from the executable.
 
 **Visible failure, no desktop fallback.** Capture errors appear in controls and
 emit diagnostic debugger text. Unavailable sources replace old pixels with a

@@ -1,0 +1,48 @@
+WindowPane branding and persistent corner grip
+
+Status: DONE
+Milestone: Recognizable native icon and a reliable small drag/options anchor
+Dependencies: 03_DESKTOP_CONTROLS.todo, 07_IN_PANE_RECOVERY.todo
+Purpose: Brand the tool and keep pane interaction available without a title bar.
+
+Tasks:
+- [x] Generate original SVG/PNG logo and multi-size favicon/Windows ICO.
+- [x] Embed branded executable/window/tray icons and inspect the rendered assets.
+- [x] Add a frosted-look corner grip independent of captured-content transparency.
+- [x] Wire grip dragging, snapping, options and visibility/picker lifecycle.
+- [x] Qualify native input/lifecycle paths and public-safe visual references.
+- [x] Update README, guides, ledger and owned continuity.
+
+Acceptance criteria:
+- Icon resources load from the executable and brand the controls/tray.
+- Grip moves the actual pane, follows its bounds and exposes its options.
+- Transparent or click-through content cannot make the grip inaccessible.
+- Hiding/snipping/picking does not leave an orphan grip or obstruct selection.
+- Frosted styling is not misrepresented as live backdrop blur.
+- No extra desktop capture, private imagery or runtime dependency.
+
+Completion evidence:
+- Release /W4 /WX build, 18 pure cases and 44 native integration checks pass.
+- Actual right-click opens the native popup; zero-opacity click-through drag
+  moves the pane; compact recovery remains unobstructed. Closing the grip hides
+  the pane without destroying its recovery control; owned lifecycle passes.
+- Optional native media export passes 43 checks; normal startup/tray/recovery/
+  exit smoke passes. Test helpers exited; no user app was terminated.
+- Original SVG/PNG logo and nine ICO resolutions inspected/decoded. Native
+  controls show the branded icon; executable resource extraction succeeds.
+- Actual grip composite and decoded updated illustration samples inspected.
+  Six GIFs decode/loop with expected timing; all 41 native GIF frames remain
+  within 5/255 channel error of full-color reference.
+- Formatter, whitespace, Python parsing and local documentation/media links pass.
+- Local executable: C:\devdesk\homedesk\Windowpane\build\Release\WindowPane.exe
+  448000 bytes; SHA256
+  2560C89CD0CBA20FD9E255B46D3643F30B40F225E54424F617272C5D2ECD6127.
+- This is local fixture qualification, not human acceptance or broad DPI/app
+  compatibility. No commit, release, install or publication was performed.
+
+Completion log:
+- 2026-11-06: User requested a logo/favicon and a small corner hook/frosted area
+  for dragging and right-click options, without restoring a title bar.
+- 2026-11-06: Completed original branding and independent owned corner grip.
+  Frosted-look shading is translucent artwork, not true backdrop blur.
+  README, usage/architecture/verification guides and provenance updated.

@@ -12,6 +12,12 @@ Tasks:
 - 04_QUALIFICATION.todo - DONE: local synthetic qualification and runnable handoff.
 - 05_DEVELOPMENT_LEDGER.todo - DONE: first-preview causal development history.
 - 06_VISUAL_README.todo - DONE: detailed README, four GIFs and nine screenshots/cards.
+- 07_IN_PANE_RECOVERY.todo - DONE: Snip again inside invalid-source panes.
+- 08_ANIMATED_ILLUSTRATIONS.todo - DONE: contextual source-to-pane animations.
+- 09_BRANDING_AND_GRIP.todo - DONE: logo/icons and corner drag/options grip.
+- 10_DEFAULT_UPDATE_RATE.todo - DONE: 60 fps default and maximum target.
+- 11_PORTABLE_PREVIEW.todo - DONE: local manual-upload preview files; not published.
+- 12_MANUAL_RELEASE_WORKFLOW.todo - DONE: manual-only GitHub preview action, local.
 
 Acceptance criteria:
 - Each workstream has explicit prerequisites and observed completion evidence.
@@ -22,8 +28,19 @@ Completion evidence:
 - Native Release build, 18 pixel/crop cases, 26 native integration checks and
   ordinary startup/tray/exit smoke passed on the development machine.
 - Guides, source-safe images, build commands and local executable are present.
-- Visual README includes 13 locally linked media assets and reproducible export
-  notes. Native media mode passed 27 checks; standard CTest remained green.
+- Initial visual README had 13 assets; current README embeds six GIFs, eleven
+  PNGs and the original SVG logo, including the native grip/recovery references.
+- Recovery update passed 18 pure cases and 36 native integration checks.
+  Earlier optional media-mode export passed 27 checks before recovery additions.
+- Branding/grip update passed 18 pure cases, 44 native checks, 43 optional demo
+  checks and ordinary startup/tray/exit smoke. See workstream 09 for scope.
+- Default-rate update passes 18 pure cases, 47 native checks and 46 optional
+  demo checks; new sessions select 60 fps. See workstream 10 for cadence limits.
+- Portable v0.1.0-preview.1 files are prepared locally with checksums and a
+  public-source snapshot. No GitHub publication; see workstream 11.
+- Manual release workflow passes local lint, build/pixel tests, tag-input,
+  packaging and cross-platform checksum checks. Remote dispatch is untested;
+  see workstream 12.
 - Human acceptance and broad application/mixed-DPI/HDR qualification are pending.
 
 Completion log:
@@ -32,3 +49,13 @@ Completion log:
   persistence, multi-pane UX, packaging and wider qualification are separate work.
 - 2026-11-06: Expanded visual guide with actual native demo sequences, screenshots,
   asset provenance, recovery/troubleshooting and explicit preview boundaries.
+- 2026-11-06: Added in-pane re-snipping with cancellation/click-through recovery
+  and original source-to-pane/workspace animations matching the requested style.
+- 2026-11-06: Embedded original logo/icons and added a small independent corner
+  grip for dragging/right-click options despite transparent/click-through content.
+- 2026-11-06: Made 60 fps the default/maximum update target, retaining lower
+  rates; refreshed native controls imagery and added live 30/60 fps coverage.
+- 2026-11-06: Prepared portable preview/release notes for manual upload after
+  read-only GitHub access was confirmed. No commit/push/tag/publication.
+- 2026-11-06: Added workflow_dispatch-only preview automation, separate scoped
+  publisher and checksum-verified draft publication. Not pushed or run remotely.

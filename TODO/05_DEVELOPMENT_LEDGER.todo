@@ -72,3 +72,90 @@ Completion log:
   the palette from all states, re-encoded and reinspected. Every decoded frame's
   native-output area now stays within 12/255 per-channel error of its full-color
   reference; a changing-frame check alone would not have caught the color issue.
+- 2026-11-06: User showed the source-resized message and requested an in-place
+  recovery action. Added Snip again directly to resized/closed placeholders,
+  with pointer hit testing, pressed/cancel behavior, focus and Enter/Space.
+  Recovery temporarily overrides click-through and works at compact pane sizes.
+  Cancelling must preserve the placeholder instead of reopening an invalid or
+  dead source; a typed capture phase now drives that behavior. Fresh capture
+  removes recovery chrome. Release build passed 18 pure and 36 native checks;
+  actual owned recovery surface was exported and visually inspected.
+- 2026-11-06: User clarified that README animations should show a source region
+  connected to a floating pane, not only isolated color patches. Authored two
+  original diagram animations: select/float/update and move/fade/remove blue
+  above another example workspace. Fictional data and windows avoid copying the
+  supplied account screenshot. Explicit labels distinguish this artwork from
+  actual capture output. Decoded samples inspected; 16/26 distinct GIF states,
+  correct loops/duration and all README links verified. Six GIFs and ten PNGs
+  now support the guide; no commit, push or publication.
+- 2026-11-06: User requested a logo/favicon and a small frosted corner anchor.
+  Generated original overlapping-window SVG/PNG/ICO artwork, embedded the icon,
+  and used it for native window/tray branding. Added a 28-DIP upper-right grip
+  as an owned layered popup: an in-content drawing would disappear with opacity
+  or become inaccessible with content-wide click-through. Independent alpha
+  and input keep dragging/options usable without restoring a title bar.
+- 2026-11-06: Grip follows pane movement/DPI, captures pointer drags, reuses
+  snapping and the actual native options menu, and hides with the owner,
+  snipping or picking. Final review found a compact-recovery overlap risk;
+  the grip now yields when its rectangle intersects the recovery button.
+  Tests cover an actual right-button-up-generated menu and unobstructed recovery.
+  The frosted look is procedural tint/edge/dots, not sampled desktop or blur.
+- 2026-11-06: Warnings-as-errors caught pointer-integer signedness in the icon
+  check; matched the API's ULONG_PTR type. An initial icon assertion assumed
+  one extraction, but requesting large and small handles returned two locally.
+  The corrected assertion requires successful extraction and both real handles.
+  Release passes 18 pure and 44 native checks; optional demo passes 43 and
+  ordinary startup/tray/recovery/exit smoke passes.
+- 2026-11-06: Added native grip-surface/relative-geometry evidence and updated
+  both drawn animations to show the handle. README uses the original logo and
+  actual combined grip/pane reference, with explicit content-only GIF provenance.
+  Native controls/logo/grip and decoded illustration samples visually inspected;
+  all 41 decoded native GIF areas stay within 5/255 channel error. Nine ICO
+  sizes decode; formatting, parsing, whitespace and local links pass.
+  No new runtime dependency, private capture, commit, install or publication.
+- 2026-11-06: Final lifecycle review found that default WM_CLOSE could destroy
+  just the grip; it now hides/releases the pane while retaining the handle for
+  recovery. Native close/show coverage passes. A final ordinary startup smoke
+  exposed a separate readiness-check race: PowerShell casts IntPtr.Zero to
+  true, so the script could accept an unready zero HWND after 100ms. Explicit
+  IntPtr.Zero comparisons now honor its existing ten-second wait. The corrected
+  startup/tray/recovery/exit smoke passes; only its own process was cleaned up.
+- 2026-11-06: User requested 60 fps by default, or the maximum. Added 30/60 fps
+  alongside 1/5/10, shared the allowed-rate list between capture and controls,
+  and defaulted to its highest value. Capture intervals now use native
+  100-nanosecond units rather than truncating 30/60 fps to whole milliseconds.
+  Windows UI timers remain best-effort; neither fresh source pixels nor a
+  measured 60 fps output rate is guaranteed.
+- 2026-11-06: New-session UI selection and actual 30/60 fps changes deliver
+  repainted fixture pixels. Release passes 18 pure/47 native, optional demo
+  46, startup/tray/recovery/exit smoke, formatting/links/media decoding.
+  The bounded resource observation explicitly selects 5 fps for comparability,
+  then restores the 60 fps default before controls export. Refreshed controls
+  visibly show 60 fps / maximum. No private capture, commit or publication.
+- 2026-11-06: User requested a release. GitHub reported read-only repository
+  access; user selected local files for manual upload rather than changing
+  authentication. Prepared v0.1.0-preview.1 EXE/portable ZIP/source snapshot,
+  SHA256SUMS, release notes and explicit manual-publication instructions.
+  Portable EXE bytes match the qualified 60 fps build; x64 and unsigned status
+  confirmed. Archives pass CRC/entry-byte checks and exclude private context,
+  git internals, caches and raw build output.
+- 2026-11-06: Source features are still uncommitted, so a tag at the old branch
+  head would misrepresent them. Included a hashed public working-tree snapshot
+  and required matching source commit/push before tagging in the manual guide.
+  No GitHub release, tag, commit, push, signing, install or upload was performed.
+- 2026-11-06: User requested GitHub release automation and explicitly selected
+  manual workflow runs only. Added a Windows x64 build/pixel-test/packaging job
+  and a separate contents-write publisher. Action versions/inputs were verified
+  from public provider metadata and pinned to commits. Hosted image manifest
+  lists the required VS2022/SDK; native capture/UI checks remain local.
+- 2026-11-06: Release input is validated and passed through environment values.
+  New tags are created at the exact checked-out/built SHA, never overwritten.
+  Publication uses a draft, downloads/checks uploaded assets, then publishes
+  an unsigned preview. Failures can leave a tag/draft for manual inspection.
+  Source/workflow must first be committed/pushed by an authorized maintainer.
+- 2026-11-06: Actual workflow Windows blocks passed default/custom/invalid tag
+  cases, build, 18 pixel checks and ZIP content/hash checks. GNU checksum review
+  caught Windows CRLF being interpreted as part of Linux filenames. Explicit
+  LF-only output fixes the manifest; both assets now pass GNU sha256sum.
+  actionlint, publisher Bash syntax, docs links and whitespace checks pass.
+  No hosted execution, account switch, push, tag or release publication.

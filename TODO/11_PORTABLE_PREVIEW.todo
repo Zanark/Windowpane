@@ -1,0 +1,40 @@
+WindowPane portable preview preparation
+
+Status: DONE
+Milestone: Manual-upload files for v0.1.0-preview.1
+Dependencies: 10_DEFAULT_UPDATE_RATE.todo
+Purpose: Package the qualified Windows x64 preview without claiming publication.
+
+Tasks:
+- [x] Check GitHub access and clarify publication authority.
+- [x] Prepare public-safe portable instructions and release notes.
+- [x] Package executable, portable ZIP and explicit public-source snapshot.
+- [x] Produce checksums and verify archive contents against original files.
+- [x] Record local-only status and update owned continuity.
+
+Acceptance criteria:
+- Packaged executable matches the qualified 60 fps default build.
+- Archives omit private context, git internals, caches and raw build/test output.
+- Source snapshot includes current uncommitted public feature changes.
+- Manual instructions warn against tagging the old source commit.
+- No installer, signing, commit, push, tag or publication is implied.
+
+Completion evidence:
+- GitHub reports read-only repository access. User selected local release files
+  for manual upload instead of changing authentication or attempting publication.
+- Qualified executable: 450560 bytes; SHA256
+  417895643CE9874223D0CAD81470E0192E152DB6D69AC06E57A11C481BAB9C3E.
+- Files: C:\devdesk\homedesk\Windowpane\build\releases\v0.1.0-preview.1
+  Portable ZIP, standalone EXE, public-source ZIP, SHA256SUMS.txt,
+  RELEASE-NOTES.md and PUBLISHING.txt.
+- Portable archive CRC/content checks pass; executable bytes match the qualified
+  binary. PE header confirms x64; Authenticode status is NotSigned.
+- Source snapshot covers 62 public working-tree files plus generated metadata
+  and per-file hashes. Entry bytes match source; private/build/git/cache paths
+  are excluded. Metadata explicitly labels the uncommitted snapshot/base commit.
+- Checksums cover the portable ZIP, standalone EXE and source ZIP.
+- No commit, push, tag, upload, release publication, signing or install.
+
+Completion log:
+- 2026-11-06: Release requested; scoped to local manual-upload files after access check.
+- 2026-11-06: Prepared and verified v0.1.0-preview.1 for manual publication.
