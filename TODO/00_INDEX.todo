@@ -1,7 +1,7 @@
 WindowPane workstream index
 
 Status: DONE
-Milestone: First native preview and visual product guide
+Milestone: First native preview, visual guide and GitHub tracking adoption
 Dependencies: None
 Purpose: Keep implementation, evidence, and acceptance distinct.
 
@@ -18,6 +18,7 @@ Tasks:
 - 10_DEFAULT_UPDATE_RATE.todo - DONE: 60 fps default and maximum target.
 - 11_PORTABLE_PREVIEW.todo - DONE: local manual-upload preview files; not published.
 - 12_MANUAL_RELEASE_WORKFLOW.todo - DONE: manual-only GitHub preview action, local.
+- 13_GITHUB_TRACKING.todo - DONE: verified issue/Project tracking adoption.
 
 Acceptance criteria:
 - Each workstream has explicit prerequisites and observed completion evidence.
@@ -42,6 +43,9 @@ Completion evidence:
   packaging and cross-platform checksum checks. Remote dispatch is untested;
   see workstream 12.
 - Human acceptance and broad application/mixed-DPI/HDR qualification are pending.
+- GitHub tracking pilot/idempotence and historical backfill verify 12 issue/
+  Project/backlink mappings. See 13 and docs\github-tracking-adoption.md.
+  No product change, source push, workflow activation or unattended sync.
 
 Completion log:
 - 2026-11-06: Created bounded first-preview workstreams. No publication requested.
@@ -59,3 +63,5 @@ Completion log:
   read-only GitHub access was confirmed. No commit/push/tag/publication.
 - 2026-11-06: Added workflow_dispatch-only preview automation, separate scoped
   publisher and checksum-verified draft publication. Not pushed or run remotely.
+- 2026-11-06: Adopted manual preview/apply tracking in dedicated owner Project 2;
+  retained historical local-completion boundaries and excluded index/ledger.

@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "repository": "Zanark/Windowpane",
+  "repository_id": "R_kgDOVkY5XQ",
+  "branch": "main",
+  "project": {
+    "id": "PVT_kwHOAe2wCs4BqePp",
+    "number": 2,
+    "url": "https://github.com/users/Zanark/projects/2",
+    "public": false,
+    "status_field_id": "PVTSSF_lAHOAe2wCs4BqePpzho1OxM",
+    "options": {
+      "Backlog": "6e4ed60a",
+      "Ready": "a84fc7b7",
+      "In progress": "47fc9ee4",
+      "In review": "da9acf6b",
+      "Done": "98236657"
+    },
+    "option_names": {
+      "Backlog": "Backlog",
+      "Ready": "Ready",
+      "In progress": "In Progress",
+      "In review": "In review",
+      "Done": "Done"
+    }
+  },
+  "state_file": "TODO\\github-sync-state.json",
+  "exclude": {
+    "00_INDEX.todo": "Navigation, not an actual workstream",
+    "05_DEVELOPMENT_LEDGER.todo": "Perpetual causal history, not an actual workstream"
+  },
+  "workstreams": {
+    "wp-01": "01_FOUNDATION.todo",
+    "wp-02": "02_NATIVE_CAPTURE.todo",
+    "wp-03": "03_DESKTOP_CONTROLS.todo",
+    "wp-04": "04_QUALIFICATION.todo",
+    "wp-06": "06_VISUAL_README.todo",
+    "wp-07": "07_IN_PANE_RECOVERY.todo",
+    "wp-08": "08_ANIMATED_ILLUSTRATIONS.todo",
+    "wp-09": "09_BRANDING_AND_GRIP.todo",
+    "wp-10": "10_DEFAULT_UPDATE_RATE.todo",
+    "wp-11": "11_PORTABLE_PREVIEW.todo",
+    "wp-12": "12_MANUAL_RELEASE_WORKFLOW.todo",
+    "wp-13": "13_GITHUB_TRACKING.todo"
+  },
+  "reviewed_statuses": {},
+  "status_map": {
+    "NOT_STARTED": ["OPEN", null, "Backlog"],
+    "DEFERRED": ["OPEN", null, "Backlog"],
+    "READY": ["OPEN", null, "Ready"],
+    "IN_PROGRESS": ["OPEN", null, "In progress"],
+    "IN_REVIEW": ["OPEN", null, "In review"],
+    "DONE": ["CLOSED", "COMPLETED", "Done"],
+    "CANCELLED": ["CLOSED", "NOT_PLANNED", "Backlog"],
+    "SUPERSEDED": ["CLOSED", "NOT_PLANNED", "Backlog"]
+  }
+}

@@ -1,4 +1,6 @@
 Native cropped capture and transparency
+Workstream-ID: wp-02
+GitHub-Issue: https://github.com/Zanark/Windowpane/issues/2
 
 Status: DONE
 Milestone: Live source-region pixels without browser integration

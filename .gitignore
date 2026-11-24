@@ -1,5 +1,6 @@
 build/
 out/
 .vs/
-.agent-context/
 *.user
+.todo-sync.lock
+__pycache__/

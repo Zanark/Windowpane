@@ -1,4 +1,6 @@
 WindowPane foundation
+Workstream-ID: wp-01
+GitHub-Issue: https://github.com/Zanark/Windowpane/issues/1
 
 Status: DONE
 Milestone: Explicit first-preview contract

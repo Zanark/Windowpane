@@ -1,0 +1,187 @@
+{
+  "schema": 1,
+  "repository_id": "R_kgDOVkY5XQ",
+  "project_id": "PVT_kwHOAe2wCs4BqePp",
+  "workstreams": {
+    "wp-01": {
+      "baseline": {
+        "title": "[01] WindowPane foundation",
+        "managed": "93df7e52efcc512987b000a6c62f9fa648bff59d325ecd07af3c2745a5f96dce",
+        "lifecycle": [
+          "CLOSED",
+          "COMPLETED"
+        ],
+        "status": "98236657"
+      },
+      "issue_id": "I_kwDOVkY5Xc8AAAABdBau4w",
+      "number": 1,
+      "url": "https://github.com/Zanark/Windowpane/issues/1",
+      "item_id": "PVTI_lAHOAe2wCs4BqePpzhGjwTc"
+    },
+    "wp-02": {
+      "baseline": {
+        "title": "[02] Native cropped capture and transparency",
+        "managed": "589c0a27eb05fc34f2b4d17c3c80e234861acbb0ea49f2e0196ec5aa6cc96003",
+        "lifecycle": [
+          "CLOSED",
+          "COMPLETED"
+        ],
+        "status": "98236657"
+      },
+      "issue_id": "I_kwDOVkY5Xc8AAAABdBcMKw",
+      "number": 2,
+      "url": "https://github.com/Zanark/Windowpane/issues/2",
+      "item_id": "PVTI_lAHOAe2wCs4BqePpzhGjx6c"
+    },
+    "wp-03": {
+      "baseline": {
+        "title": "[03] Desktop selection and pane controls",
+        "managed": "f343a631eb7bc931d22c389cc36bc8ce6ad9762a251be8ca0323c15aacba4550",
+        "lifecycle": [
+          "CLOSED",
+          "COMPLETED"
+        ],
+        "status": "98236657"
+      },
+      "issue_id": "I_kwDOVkY5Xc8AAAABdBcSmg",
+      "number": 3,
+      "url": "https://github.com/Zanark/Windowpane/issues/3",
+      "item_id": "PVTI_lAHOAe2wCs4BqePpzhGjyAo"
+    },
+    "wp-04": {
+      "baseline": {
+        "title": "[04] First-preview qualification and delivery",
+        "managed": "39dbddb54e31edce8658696d4dc1f6c89365105a27f63163a8744d68717db9ff",
+        "lifecycle": [
+          "CLOSED",
+          "COMPLETED"
+        ],
+        "status": "98236657"
+      },
+      "issue_id": "I_kwDOVkY5Xc8AAAABdBcYQQ",
+      "number": 4,
+      "url": "https://github.com/Zanark/Windowpane/issues/4",
+      "item_id": "PVTI_lAHOAe2wCs4BqePpzhGjyHE"
+    },
+    "wp-06": {
+      "baseline": {
+        "title": "[06] WindowPane visual README",
+        "managed": "1aef3abf1f01cc2d632ca01ef03ee3ed3998cdc552e869e33b73359e42be3222",
+        "lifecycle": [
+          "CLOSED",
+          "COMPLETED"
+        ],
+        "status": "98236657"
+      },
+      "issue_id": "I_kwDOVkY5Xc8AAAABdBcekw",
+      "number": 5,
+      "url": "https://github.com/Zanark/Windowpane/issues/5",
+      "item_id": "PVTI_lAHOAe2wCs4BqePpzhGjyMY"
+    },
+    "wp-07": {
+      "baseline": {
+        "title": "[07] In-pane recovery action",
+        "managed": "87e382a8a274050e683e684c0fa4a9e1514baa39a6bada8819f0679ecc0b05aa",
+        "lifecycle": [
+          "CLOSED",
+          "COMPLETED"
+        ],
+        "status": "98236657"
+      },
+      "issue_id": "I_kwDOVkY5Xc8AAAABdBcmDQ",
+      "number": 6,
+      "url": "https://github.com/Zanark/Windowpane/issues/6",
+      "item_id": "PVTI_lAHOAe2wCs4BqePpzhGjySk"
+    },
+    "wp-08": {
+      "baseline": {
+        "title": "[08] Animated source-to-pane illustrations",
+        "managed": "ec748d2cd099f54a1f64e832183da7fe194abb32d7e224893433e20a239184ac",
+        "lifecycle": [
+          "CLOSED",
+          "COMPLETED"
+        ],
+        "status": "98236657"
+      },
+      "issue_id": "I_kwDOVkY5Xc8AAAABdBcseQ",
+      "number": 7,
+      "url": "https://github.com/Zanark/Windowpane/issues/7",
+      "item_id": "PVTI_lAHOAe2wCs4BqePpzhGjyYo"
+    },
+    "wp-09": {
+      "baseline": {
+        "title": "[09] WindowPane branding and persistent corner grip",
+        "managed": "ce0f3f4e6dc33d29ee60b41f8002873af0ec01a9f0837c8b8b588c5ed34aa6db",
+        "lifecycle": [
+          "CLOSED",
+          "COMPLETED"
+        ],
+        "status": "98236657"
+      },
+      "issue_id": "I_kwDOVkY5Xc8AAAABdBcxwg",
+      "number": 8,
+      "url": "https://github.com/Zanark/Windowpane/issues/8",
+      "item_id": "PVTI_lAHOAe2wCs4BqePpzhGjyeM"
+    },
+    "wp-10": {
+      "baseline": {
+        "title": "[10] WindowPane default update rate",
+        "managed": "410ec4f2aa00987fc6d7ed3a11f6d2d687b09bd22fb7111ebc79591fcda5003b",
+        "lifecycle": [
+          "CLOSED",
+          "COMPLETED"
+        ],
+        "status": "98236657"
+      },
+      "issue_id": "I_kwDOVkY5Xc8AAAABdBc3ug",
+      "number": 9,
+      "url": "https://github.com/Zanark/Windowpane/issues/9",
+      "item_id": "PVTI_lAHOAe2wCs4BqePpzhGjyi0"
+    },
+    "wp-11": {
+      "baseline": {
+        "title": "[11] WindowPane portable preview preparation",
+        "managed": "2fcd3cc0306a2eb49c9fcbee7b252771616798405186305f2071d1b0cb492bd1",
+        "lifecycle": [
+          "CLOSED",
+          "COMPLETED"
+        ],
+        "status": "98236657"
+      },
+      "issue_id": "I_kwDOVkY5Xc8AAAABdBc-Sg",
+      "number": 10,
+      "url": "https://github.com/Zanark/Windowpane/issues/10",
+      "item_id": "PVTI_lAHOAe2wCs4BqePpzhGjypU"
+    },
+    "wp-12": {
+      "baseline": {
+        "title": "[12] WindowPane manual GitHub release workflow",
+        "managed": "309a4d7c03f680ad8d5916dab2d38fc0de4aabdd0a8e08046b7166fd5d9b5e0f",
+        "lifecycle": [
+          "CLOSED",
+          "COMPLETED"
+        ],
+        "status": "98236657"
+      },
+      "issue_id": "I_kwDOVkY5Xc8AAAABdBdEFw",
+      "number": 11,
+      "url": "https://github.com/Zanark/Windowpane/issues/11",
+      "item_id": "PVTI_lAHOAe2wCs4BqePpzhGjyvU"
+    },
+    "wp-13": {
+      "baseline": {
+        "title": "[13] WindowPane GitHub tracking adoption",
+        "managed": "860e41ca87de3de6712a12d35e0df3a6375237edcc6be1d6b67f981d4b57e759",
+        "lifecycle": [
+          "CLOSED",
+          "COMPLETED"
+        ],
+        "status": "98236657"
+      },
+      "issue_id": "I_kwDOVkY5Xc8AAAABdBdJvw",
+      "number": 12,
+      "url": "https://github.com/Zanark/Windowpane/issues/12",
+      "item_id": "PVTI_lAHOAe2wCs4BqePpzhGjy0I"
+    }
+  }
+}

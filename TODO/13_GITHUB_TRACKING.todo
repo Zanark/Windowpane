@@ -1,0 +1,55 @@
+WindowPane GitHub tracking adoption
+Workstream-ID: wp-13
+GitHub-Issue: https://github.com/Zanark/Windowpane/issues/12
+
+Status: DONE
+Milestone: Verified workstream-to-issue-to-Project tracking
+Dependencies: None
+Purpose: Adopt the updated development/manual contract without product changes.
+
+Tasks:
+- [x] Read current manual, contributor contract and all historical workstreams.
+- [x] Inventory canonical repository, credentials, issues and owner Projects.
+- [x] Record initial preview and configure repository-local Zanark attribution.
+- [x] Establish repository-specific Project and tracking configuration.
+- [x] Implement and test preview/apply, identity, conflicts and recovery.
+- [x] Verify a bounded pilot and idempotent rerun.
+- [x] Backfill the remaining historical workstreams.
+- [x] Reconcile issue states, Project statuses and persistent backlinks.
+- [x] Update contributor guidance, index, ledger and owned private continuity.
+
+Acceptance criteria:
+- One included workstream maps to one issue and one Project item containing it.
+- All eight fields and historical evidence survive; index/ledger are excluded.
+- Repeated runs reuse identities; remote human edits block that item.
+- Partial writes are recoverable; no credentials/private context are published.
+- Completed, reopened, blocked and cancelled states have explicit policies.
+- No unfinished product feature, commit/push, schedule or workflow activation.
+
+Completion evidence:
+- Initial public repository inventory: zero issues, no linked Project.
+- Owner's unrelated BowserBOY Project is excluded from this adoption.
+- Initial worktree clean at 11ddfe0; existing source behavior unchanged.
+- Both effective Git identities use repository-local Zanark attribution.
+- Project 2 is private by default and linked to this public repository.
+  Existing Status fields/options and IDs retained; missing stages added.
+- 22 focused Python tests pass with public dummy fixtures and no credentials.
+- wp-01 pilot creates issue 1, closed/completed, with a Done Project item and
+  persistent local backlink. Full managed-body/lifecycle/item/status read-back
+  passes. Rerun reuses both IDs with unchanged issue updatedAt and no writes.
+- Backfill created 11 further issues and reused the pilot. All 12 issue bodies,
+  lifecycles, issue-containing Project items/statuses and backlinks matched
+  read-back; following all-workstream preview was no-op with zero conflicts.
+- Eleven historical workstreams closed/completed/Done; this bounded adoption
+  is now complete and its completion is synchronized by the same integration.
+- Contributor guide, configuration, public adoption receipt and owned context
+  preserve commands, ownership, exclusions and pending/conflict recovery.
+- No application behavior, release workflow or sealed package changed.
+  All source/config/backlinks remain local; no commit, push or activation.
+
+Completion log:
+- 2026-11-06: Authorized migration started; preview recorded before remote writes.
+- 2026-11-06: Foundation pilot and unchanged-timestamp idempotence verified before
+  remaining historical imports. No product behavior or release workflow changed.
+- 2026-11-06: Historical backfill and 12-way read-back complete. Adopted explicit
+  manual invocation; no unattended synchronization or human acceptance claimed.

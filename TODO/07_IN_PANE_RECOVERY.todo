@@ -1,4 +1,6 @@
 In-pane recovery action
+Workstream-ID: wp-07
+GitHub-Issue: https://github.com/Zanark/Windowpane/issues/6
 
 Status: DONE
 Milestone: Re-snip directly from an invalid-source pane

@@ -7,6 +7,7 @@ book edition or a claim of exhaustive source annotation.
 2. [Architecture and design boundaries](02-architecture.md): ownership, capture lifecycle, privacy.
 3. [Pixels, coordinates and transparency](03-pixels-and-transparency.md): algorithms, alpha invariants and cost.
 4. [Development and verification](04-development-and-verification.md): commands, actual evidence and qualification limits.
+5. [GitHub tracking adoption](github-tracking-adoption.md): issue/Project ownership, preview/apply, recovery and verified migration.
 
 The [TODO index](../TODO/00_INDEX.todo) tracks bounded work.
 The [development ledger](../TODO/05_DEVELOPMENT_LEDGER.todo) explains changes and failures.

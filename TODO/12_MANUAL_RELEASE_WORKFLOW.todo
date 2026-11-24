@@ -1,4 +1,6 @@
 WindowPane manual GitHub release workflow
+Workstream-ID: wp-12
+GitHub-Issue: https://github.com/Zanark/Windowpane/issues/11
 
 Status: DONE
 Milestone: Manually dispatched, checksum-verified preview publication

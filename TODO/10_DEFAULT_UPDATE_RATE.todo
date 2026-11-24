@@ -1,4 +1,6 @@
 WindowPane default update rate
+Workstream-ID: wp-10
+GitHub-Issue: https://github.com/Zanark/Windowpane/issues/9
 
 Status: DONE
 Milestone: Default to the highest selectable 60 fps target

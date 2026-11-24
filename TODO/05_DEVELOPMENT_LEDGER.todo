@@ -159,3 +159,35 @@ Completion log:
   LF-only output fixes the manifest; both assets now pass GNU sha256sum.
   actionlint, publisher Bash syntax, docs links and whitespace checks pass.
   No hosted execution, account switch, push, tag or release publication.
+- 2026-11-06: User authorized adoption of the updated tracking manual. Reconciled
+  current clean 11ddfe0 against the earlier uncommitted/read-only handoff.
+  Reviewed shared credential runner, never its secret file; runner-backed
+  Zanark has repository/Project write access. Configured only local attribution.
+  Complete initial inventory found zero issues, no linked Project and an
+  unrelated BowserBOY board. Created dedicated private-default WindowPane
+  Project 2, linked repository, retained existing option IDs/fields and added
+  missing stages. No visibility/permission or unrelated board changes.
+- 2026-11-06: No existing sync runtime existed here. Implemented bounded stdlib
+  Python/gh preview/apply, explicit public allowlist/projection, stable markers,
+  atomic baselines/pending writes and independent conflict isolation. Managed
+  body updates preserve human prefix/suffix and comments; local/remote deletion
+  is never inferred. Exact statuses cover reopening, cancellation and blockers.
+  Review identified the need to block an unmapped local backlink before
+  creating; added regression coverage.
+- 2026-11-06: All-workstream preview preceded pilot. Foundation issue 1 is
+  closed/completed with Done Project membership and persistent backlink.
+  Exact rerun preserves issue/item IDs and updatedAt. Only then imported 11
+  remaining issues, reusing pilot: all 12 bodies/states/items/statuses/backlinks
+  read back, then full preview was no-op. Index and perpetual ledger excluded.
+  22 focused offline tests pass; no native behavioral change or repeated capture.
+  Contributor/adoption guidance and owned continuity updated. Workstream 13
+  closes through the same integration after recording bounded completion.
+  No commit, push, release, workflow dispatch/activation or background service.
+- 2026-11-06: Adoption issue 12 now reads closed/completed with Done status.
+  Independent full GraphQL inventory confirms 12 closed issues, zero open,
+  12 unique issue-containing Project items and all Done. Full explicit rerun
+  reports 12 verified reuses/no-ops with unchanged issue timestamps/item IDs.
+  Local checks confirm 12 exact backlinks and no pending operations; all 11
+  historical workstreams are unchanged after removing the two metadata lines
+  and normalizing newlines. Public changes contain no credential/context file;
+  app source and release YAML are unchanged. Whitespace checks pass.
